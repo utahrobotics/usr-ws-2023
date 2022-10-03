@@ -4,7 +4,7 @@ This document shall contain as much information pertaining to the programming te
 
 ## Coding Style
 ### Overall
-Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. 
+Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. Follow the layout of a package as well; There is a rightful place for all files, and putting stuff in the wrong place can lead to confusion.
 
 All scripts, regardless of programming language, should be kept small. Big scripts are candidates for refactoring, or reconsideration. Remember, the easiest code to read, write, and debug is no code. If your script is getting to big, you may want to do some research to see if there is a library that does at least some of what you need.
 
@@ -35,6 +35,8 @@ File sizes for scripts should try to stay under 8 KB. Any higher is a sign that 
 It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/humble/Tutorials/Intermediate/Rosdep.html)
 
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
+
+All Python scripts shall use tabs instead of spaces. If there's one thing to take away from all this, it is this statement. This has caused *many* issues in the past.
 
 How to cite python code:
 
