@@ -6,7 +6,7 @@ This document shall contain as much information pertaining to the programming te
 ### Overall
 Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. Follow the layout of a package as well; There is a rightful place for all files, and putting stuff in the wrong place can lead to confusion.
 
-All scripts, regardless of programming language, should be kept small. Big scripts are candidates for refactoring, or reconsideration. Remember, the easiest code to read, write, and debug is no code. If your script is getting to big, you may want to do some research to see if there is a library that does at least some of what you need.
+All scripts, regardless of programming language, should be kept small. Big scripts are candidates for refactoring, or reconsideration. Remember, the easiest code to read, write, and debug is no code. If your script is getting to big, you may want to do some research to see if there is a library that does at least some of what you need. Scripts should also only have one overarching goal in mind. It is perfectly fine to have multiple scripts (ideally Nodes) that all must work together to accomplish just one competition task (ie. digging).
 
 You may notice that GitHub does not let you push to `main` directly (hopefully). This is intentional so that we can keep `main` at a functional state. There is usually always a branch ready for you to write code to. If there isn't, ask the team lead before making your own, as having two or more branches that should contain the same thing can be very confusing. To merge to main, you must make a pull request, and wait for it to get approved. Before creating a request, you should check that your branch passes all automated checks (see below sections).
 
@@ -18,6 +18,8 @@ If you copy a significant code snippet (highly subjective), or an entire script,
 If it does not contain sufficient documentation, you must add it yourself.
 
 Do not commit files that other people do not need. The usual way to avoid this is to add the file(s) to the gitignore. However, since everyone shares this gitignore, it can cause unintended side effects with name collisions. As such, updates to gitignore are a team decision. Instead, you should use your local gitignore (refer to reading list)
+
+Unit testing is a strong recommendation as well. Understandably, many components of our code cannot be unit tested as it involves physical interactions. However, if you follow proper separation of concerns, there should be plenty of code to unittest. Individual tests should be small, and test suites should test one class or module. All test suites should be contained within the `test` folder of the package that contains the code being tested
 
 ### Python
 We are to follow all of Python's PEP Style Guides. PyCharm (and probably otthers) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:
@@ -38,6 +40,8 @@ It is very important to note that ROS applications are not run the same way as r
 
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
 
+Unit tests shall be done with `pytest`, which is an extremely simple library.
+
 How to cite python code:
 
 `# Taken from <web link>`
@@ -50,3 +54,4 @@ Below is a list of things you should read up about
 4. [Python Packages Guide](https://realpython.com/python-modules-packages/)
 5. [Python Documentation Guide](https://realpython.com/documenting-python-code/)
 6. [Local Gitignore](https://stackoverflow.com/questions/49305201/gitignore-only-on-local)
+7. [Pytest](https://docs.pytest.org/en/7.1.x/getting-started.html)
