@@ -14,7 +14,7 @@ Describe what exactly the solution must do, or what problem the solution is solv
 Are there implementations out there that can do at least some of what we need? Note them here
 
 **Existing internal solutions**
-Is there any code in our repository that can do at least some of what we need? Concisely describe where to find them
+Is there any code in our organization that can do at least some of what we need? Concisely describe where to find them
 
 **Quirks or Specifics**
 Is there anything specific you can describe here that may help others finish this task?
