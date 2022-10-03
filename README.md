@@ -3,7 +3,7 @@ Codebase (and other dependencies) for running our candidate for the 2023 competi
 This document shall contain as much information pertaining to the programming team as possible.
 
 ## Coding Style
-#### Overall
+### Overall
 Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. 
 
 All scripts, regardless of programming language, should be kept small. Big scripts are candidates for refactoring, or reconsideration. Remember, the easiest code to read, write, and debug is no code. If your script is getting to big, you may want to do some research to see if there is a library that does at least some of what you need.
@@ -17,11 +17,16 @@ ROS packages will also contain a `README.md`, mainly to explain what it does, an
 If you copy a significant code snippet (highly subjective), or an entire script, you are recommended to cite it (refer to below sections)
 If it does not contain sufficient documentation, you must add it yourself.
 
-#### Python
+### Python
 We are to follow all of Python's PEP Style Guides. PyCharm (and probably otthers) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:
+
 `# Resolved Warning: <explanation>`
+
 Pylint is automatically ran on each push, so be sure to check it after making your last push (The cross or tick that can be found next to the commit ID)
+
 ![](https://manglemix.com/usr_files/checks.png)
+
+Pylint can be pretty strict, so if you feel that certain warning is unnecessary, you can ignore it until you make a pull request. You can bring it up inside the request discussion, and the team lead may consider loosening the restrictions.
 
 File sizes for scripts should try to stay under 8 KB. Any higher is a sign that you should write a package instead (also refer to Overall). You are strongly encouraged to use existing python libraries to help you. 
 
@@ -30,6 +35,7 @@ It is very important to note that ROS applications are not run the same way as r
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
 
 How to cite python code:
+
 `# Taken from <web link>`
 
 ## Reading List
