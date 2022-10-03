@@ -17,6 +17,8 @@ ROS packages will also contain a `README.md`, mainly to explain what it does, an
 If you copy a significant code snippet (highly subjective), or an entire script, you are recommended to cite it (refer to below sections)
 If it does not contain sufficient documentation, you must add it yourself.
 
+Do not commit files that other people do not need. The usual way to avoid this is to add the file(s) to the gitignore. However, since everyone shares this gitignore, it can cause unintended side effects with name collisions. As such, updates to gitignore are a team decision. Instead, you should use your local gitignore (refer to reading list)
+
 ### Python
 We are to follow all of Python's PEP Style Guides. PyCharm (and probably otthers) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:
 
@@ -45,3 +47,4 @@ Below is a list of things you should read up about
 3. [ROS2 Simplified Installation](https://docs.google.com/document/d/1lkOGz_ISWwEarPJ8ZaNjJ-dXnlfeb1B63kSqP9ng6hY/edit?usp=sharing)
 4. [Python Packages Guide](https://realpython.com/python-modules-packages/)
 5. [Python Documentation Guide](https://realpython.com/documenting-python-code/)
+6. [Local Gitignore](https://stackoverflow.com/questions/49305201/gitignore-only-on-local)
