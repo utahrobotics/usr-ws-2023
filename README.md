@@ -12,7 +12,7 @@ You may notice that GitHub does not let you push to `main` directly (hopefully).
 
 Documentation is a thing we care about here. At the very least, you should have in-line comments for complex sections of code. Your team lead will carry out review sessions so you can better understand what is hard to read. Ideally, you should also have method, class, and module/script documentation, even package documentation if you are making one. Everyone is encouraged to add their names to the script documentation as an author if they feel they have modified it in a significant way.
 
-ROS packages will also contain a `README.md`, mainly to explain what it does, and all the ways it accesses anything outside the package. This includes messages, services, actions, wireless communication, filesystem actions (eg. reading or writing files), and GPIO. These files should ideally be written with Markdown, but this is not necessary (good skill to have though).
+ROS packages will also contain a `README.md`, mainly to explain what nodes are contained within, how these nodes should be used, and what to expect when using these nodes. Any script that is not a node does not have to be explained here (but they still need their own documentation).
 
 If you copy a significant code snippet (highly subjective), or an entire script, you are recommended to cite it (refer to below sections)
 If it does not contain sufficient documentation, you must add it yourself.
@@ -23,6 +23,8 @@ Do not commit files that other people do not need. The usual way to avoid this i
 We are to follow all of Python's PEP Style Guides. PyCharm (and probably otthers) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:
 
 `# Resolved Warning: <explanation>`
+
+All Python scripts shall use tabs instead of spaces. If there's one thing to take away from all this, it is this statement. This has caused *many* issues in the past.
 
 Pylint is automatically ran on each push, so be sure to check it after making your last push (The cross or tick that can be found next to the commit ID)
 
@@ -35,8 +37,6 @@ File sizes for scripts should try to stay under 8 KB. Any higher is a sign that 
 It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/humble/Tutorials/Intermediate/Rosdep.html)
 
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
-
-All Python scripts shall use tabs instead of spaces. If there's one thing to take away from all this, it is this statement. This has caused *many* issues in the past.
 
 How to cite python code:
 
