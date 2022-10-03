@@ -1,1 +1,3 @@
-print("hello world"
+import wx3fff
+
+print("hello world")
