@@ -50,7 +50,7 @@ How to cite python code:
 Below is a list of things you should read up about
 1. [ROS2 Documentation](https://docs.ros.org/en/humble/index.html)
 2. [Markdown Guide](https://www.markdownguide.org/)
-3. [ROS2 Simplified Installation](https://docs.google.com/document/d/1lkOGz_ISWwEarPJ8ZaNjJ-dXnlfeb1B63kSqP9ng6hY/edit?usp=sharing)
+3. [ROS2 Simplified Installation](https://docs.google.com/document/d/1emTYbDWZH72I8Ifpqjb3O8foFpgskyILs_1xUKBiDWM/edit?usp=sharing)
 4. [Python Packages Guide](https://realpython.com/python-modules-packages/)
 5. [Python Documentation Guide](https://realpython.com/documenting-python-code/)
 6. [Local Gitignore](https://stackoverflow.com/questions/49305201/gitignore-only-on-local)
