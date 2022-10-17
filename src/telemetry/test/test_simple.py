@@ -2,5 +2,5 @@
 
 
 def test_copyright():
-	"""Test doc-string"""
-	pass
+    """Test doc-string"""
+    pass

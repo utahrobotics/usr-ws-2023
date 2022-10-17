@@ -26,7 +26,7 @@ We are to follow all of Python's PEP Style Guides. PyCharm (and probably otthers
 
 `# Resolved Warning: <explanation>`
 
-All Python scripts shall use tabs instead of spaces. If there's one thing to take away from all this, it is this statement. This has caused *many* issues in the past.
+All Python scripts shall use 4 spaces per indent, not a tab. If there's one thing to take away from all this, it is this statement. This has caused *many* issues in the past.
 
 Pylint is automatically ran on each push, so be sure to check it after making your last push (The cross or tick that can be found next to the commit ID)
 
