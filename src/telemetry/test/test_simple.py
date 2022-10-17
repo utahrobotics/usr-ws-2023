@@ -3,4 +3,3 @@
 
 def test_copyright():
     """Test doc-string"""
-    pass
