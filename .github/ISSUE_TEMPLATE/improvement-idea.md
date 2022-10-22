@@ -2,7 +2,7 @@
 name: Improvement idea
 about: Suggest a way to improve our current code
 title: ''
-labels: open
+labels: enhancement
 assignees: ''
 
 ---

@@ -2,7 +2,7 @@
 name: Task
 about: There is something that must be done to accomplish some goal
 title: ''
-labels: open
+labels: ''
 assignees: ''
 
 ---

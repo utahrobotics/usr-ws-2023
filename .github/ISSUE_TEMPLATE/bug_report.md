@@ -2,7 +2,7 @@
 name: Bug report
 about: Discovered some unintended functionality? Report it here
 title: ''
-labels: bug, open
+labels: bug
 assignees: ''
 
 ---
