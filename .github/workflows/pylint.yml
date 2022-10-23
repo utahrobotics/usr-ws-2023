@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --disable E0401 --ignore-patterns=setup.py;
+        pylint $(git ls-files '*.py') --disable E0401,E0611 --ignore-patterns=setup.py;
