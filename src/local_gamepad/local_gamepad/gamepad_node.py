@@ -38,7 +38,6 @@ class GamepadNode(Node):
 
             self.movement_intent.steering = steering
             self.movement_intent.drive = drive
-            self.get_logger().info(str(self.movement_intent))
             self.publisher.publish(self.movement_intent)
 
 
