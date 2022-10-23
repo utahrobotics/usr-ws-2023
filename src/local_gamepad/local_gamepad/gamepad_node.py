@@ -9,7 +9,7 @@ from local_gamepad.msg import MovementIntent
 class GamepadNode(Node):
     joy_max = 32767
     joy_min = -32768
-    deadzone = 0.05
+    deadzone = 0.1
 
     def __init__(self):
         super().__init__("gamepad_node")
@@ -31,10 +31,10 @@ class GamepadNode(Node):
             for event in events:
                 # left axis joystick horizontal
                 if event.code == 'ABS_X':
-                    steering = self.joy_normalize(event.state) if abs(event.state) > self.deadzone else 0
+                    steering = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
                 # left axis joystick vertical
                 elif event.code == 'ABS_Y':
-                    drive = self.joy_normalize(event.state) if abs(event.state) > self.deadzone else 0
+                    drive = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
 
             self.movement_intent.steering = steering
             self.movement_intent.drive = drive
