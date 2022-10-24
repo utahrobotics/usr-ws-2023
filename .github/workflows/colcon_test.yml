@@ -1,0 +1,17 @@
+name: ColconTest
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: osrf/ros:foxy-desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: "colcon build"
+
+      - name: Test
+        run: "colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
