@@ -3,10 +3,11 @@ name: ColconTest
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     container: osrf/ros:foxy-desktop
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - run: "chmod +x /opt/ros/foxy/setup.sh && ./opt/ros/foxy/setup.sh && colcon test"
+      - name: Test
+        run: "chmod +x /opt/ros/foxy/setup.bash && source /opt/ros/foxy/setup.bash && colcon build && colcon test"
