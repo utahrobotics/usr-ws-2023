@@ -9,5 +9,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Debug1
+        run: "ls /opt"
+
+      - name: Debug2
+        run: "ls /opt/ros"
+
+      - name: Debug3
+        run: "ls /opt/ros/foxy"
+
       - name: Test
-        run: "chmod +x /opt/ros/foxy/setup.bash && source /opt/ros/foxy/setup.bash && colcon build && colcon test"
+        run: "chmod +x /opt/ros/foxy/setup.sh && ./opt/ros/foxy/setup.sh && colcon build && colcon test"
