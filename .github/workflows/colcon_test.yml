@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build
-        run: "colcon build"
+        run: "colcon build --symlink-install"
 
       - name: Test
         run: "colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
