@@ -28,6 +28,7 @@ class GamepadNode(Node):
         steering = 0.0
         while True:
             events = get_gamepad()
+            self.get_logger().info('Event received')
             for event in events:
                 # left axis joystick horizontal
                 if event.code == 'ABS_X':
