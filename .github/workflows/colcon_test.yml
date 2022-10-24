@@ -1,0 +1,16 @@
+name: ColconTest
+
+on: [push]
+
+jobs:
+  build_docker:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:bionic
+    steps:
+      - uses: ros-tooling/setup-ros@v0.4.1
+        with:
+          required-ros-distributions: foxy
+      - run: "source /opt/ros/foxy/setup.bash && colcon test"
+      - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
+
