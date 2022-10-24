@@ -3,12 +3,11 @@ name: ColconTest
 on: [push]
 
 jobs:
-  build_docker:
+  build:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:focal
+    container: osrf/ros:foxy-desktop
     steps:
-      - uses: ros-tooling/setup-ros@v0.4
-        with:
-          required-ros-distributions: foxy
+      - name: Checkout
+        uses: actions:checkout@v3
+        
       - run: "source /opt/ros/foxy/setup.bash && colcon test"
