@@ -10,5 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Build
+        run: "colcon build"
+
       - name: Test
-        run: "colcon build && colcon test"
+        run: "colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
