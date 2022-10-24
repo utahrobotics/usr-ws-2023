@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: ColconTest
 
 on: [push]
@@ -14,3 +15,7 @@ jobs:
       - run: "source /opt/ros/foxy/setup.bash && colcon test"
       - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
 
+=======
+- name: Setup ROS environment
+  uses: ros-tooling/setup-ros@0.4.1
+>>>>>>> main
