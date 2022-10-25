@@ -13,4 +13,3 @@ jobs:
           required-ros-distributions: noetic humble
       - run: "source /opt/ros/humble/setup.bash && ros2 run --help"
       - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
-        
