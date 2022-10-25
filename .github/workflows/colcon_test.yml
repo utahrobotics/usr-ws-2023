@@ -10,6 +10,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup
+        uses: "exec bash && source /opt/ros/foxy/setup.bash"
+
       - name: Build
         run: "colcon build --symlink-install"
 
