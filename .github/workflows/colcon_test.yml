@@ -3,15 +3,13 @@ name: ColconTest
 on: [push]
 
 jobs:
-  test:
+  build_docker:
     runs-on: ubuntu-latest
-    container: osrf/ros:foxy-desktop
+    container:
+      image: ubuntu:jammy
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Build
-        run: "exec bash && source /opt/ros/foxy/setup.bash && colcon build --symlink-install > out.txt && exec sh && cat out.txt"
-
-      - name: Test
-        run: "exec bash && source /opt/ros/foxy/setup.bash && colcon test --return-code-on-test-failure --event-handlers console_cohesion+ > out.txt && exec sh && cat out.txt"
+      - uses: ros-tooling/setup-ros@v0.4
+        with:
+          required-ros-distributions: noetic humble
+      - run: "source /opt/ros/humble/setup.bash && ros2 run --help"
+      - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
