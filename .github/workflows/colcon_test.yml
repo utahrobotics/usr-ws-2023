@@ -10,11 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup
-        run: "exec bash && source /opt/ros/foxy/setup.bash"
-
       - name: Build
-        run: "colcon build"
+        run: "exec bash && source /opt/ros/foxy/setup.bash && colcon build --symlink-install"
 
       - name: Test
-        run: "colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
+        run: "exec bash && source /opt/ros/foxy/setup.bash && colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
