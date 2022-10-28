@@ -3,7 +3,7 @@ from threading import Event
 
 import rclpy
 
-from message_handler import parse_message, SoftPing, HardPing
+from message_handler import parse_message, SoftPing, HardPing, InvalidMessage
 
 
 class TCPClient(rclpy.node.Node):
@@ -25,7 +25,7 @@ class TCPClient(rclpy.node.Node):
                     reader, self.writer = await self.connect()
                     break
                 except Exception as e:
-                    self.get_logger().error("Error in TCPClient: " + str(e))
+                    self.get_logger().error(f"Error in TCPClient: {e}")
                     await asyncio.sleep(self.FAIL_DELAY)
 
             self.writer_connected.set()
@@ -39,8 +39,13 @@ class TCPClient(rclpy.node.Node):
 
                 result = parse_message(data)
 
+                if isinstance(result, InvalidMessage):
+                    self.get_logger().error(f"Received invalid message header: {result.header}")
+                    continue
+
                 if isinstance(result, (SoftPing, HardPing)):
                     self.writer.write(data)
+                    continue
 
             self.writer_connected.clear()
             self.writer = None
