@@ -13,6 +13,7 @@ class TCPClient(Node):
     FAIL_DELAY = 2
 
     def __init__(self):
+        super().__init__("tcp_client")
         self.writer: asyncio.StreamWriter = None
         # For other processes that need to access the writer,
         # This will stop them if the writer is None
