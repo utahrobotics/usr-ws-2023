@@ -19,7 +19,7 @@ class TCPClient(Node):
         # This will stop them if the writer is None
         self.writer_connected = Event()
 
-        self.movement_intent_pub = self.create_publisher(RemoteMovementIntent, 'movement_intent', 10)
+        self.movement_intent_pub = self.create_publisher(MovementIntent, 'movement_intent', 10)
 
         asyncio.create_task(self.main_loop())
 
