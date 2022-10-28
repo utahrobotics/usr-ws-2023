@@ -17,7 +17,7 @@ setup(
     maintainer_email='najman.husaini@utah.edu',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
+    tests_require=['pytest', 'telemetry/message_handler'],
     entry_points={
         'console_scripts': [
         ],
