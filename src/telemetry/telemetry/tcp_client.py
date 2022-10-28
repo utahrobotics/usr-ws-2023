@@ -65,6 +65,10 @@ class TCPClient(rclpy.node.Node):
         )
 
 
-if __name__ == "__main__":
+def main():
     rclpy.init()
     rclpy.spin(TCPClient())
+
+
+if __name__ == "__main__":
+    main()
