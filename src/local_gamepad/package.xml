@@ -21,7 +21,6 @@
   <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
-    <build_type>ament_python</build_type>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_cmake_python</build_type>
   </export>
 </package>
