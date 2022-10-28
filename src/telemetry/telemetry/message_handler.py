@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
 
 @dataclass
@@ -7,9 +8,15 @@ class InvalidMessage:
     body: bytes
 
 
-@dataclass
-class BodyOnlyMessage:
-    body: bytes
+class AbstractMessage(ABC):
+    @abstractmethod
+    def __init__(self, data: bytes):
+        pass
+
+
+class BodyOnlyMessage(AbstractMessage):
+    def __init__(self, data: bytes):
+        self.body = data
 
 
 class SoftPing(BodyOnlyMessage):
@@ -33,6 +40,4 @@ def parse_message(message: bytes):
     if header >= len(MESSAGE_TYPES):
         return InvalidMessage(header, message)
 
-    msg_type = MESSAGE_TYPES[header]
-    if issubclass(msg_type, BodyOnlyMessage):
-        return msg_type(message)
+    return MESSAGE_TYPES[header](message)
