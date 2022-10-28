@@ -4,7 +4,7 @@ from threading import Event
 import rclpy
 
 from telemetry.message_handler import parse_message, SoftPing, HardPing, InvalidMessage, RemoteMovementIntent
-from local_gamepad.msg import MovementIntent
+from global_msgs.msg import MovementIntent
 
 
 class TCPClient(rclpy.node.Node):
