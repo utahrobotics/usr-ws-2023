@@ -29,10 +29,10 @@ MESSAGE_TYPES = (
 def parse_message(message: bytes):
     header = message[0]
     message = message[1::]
-    
+
     if header >= len(MESSAGE_TYPES):
         return InvalidMessage(header, message)
-    
+
     msg_type = MESSAGE_TYPES[header]
     if issubclass(msg_type, BodyOnlyMessage):
         return msg_type(message)
