@@ -21,7 +21,7 @@ class TCPClient(Node):
 
         self.movement_intent_pub = self.create_publisher(MovementIntent, 'movement_intent', 10)
 
-        asyncio.create_task(self.main_loop())
+        asyncio.run(self.main_loop())
 
     async def main_loop(self):
         while True:  # outer loop
