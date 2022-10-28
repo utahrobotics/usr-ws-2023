@@ -41,6 +41,10 @@ class GamepadNode(Node):
             self.publisher.publish(self.movement_intent) # publish movement intent
 
 
-if __name__ == "__main__":
+def main():
     rclpy.init()
     rclpy.spin(GamepadNode())
+
+
+if __name__ == "__main__":
+    main()
