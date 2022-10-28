@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(local_gamepad)
+project(global_msgs)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -17,7 +17,6 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -27,13 +26,6 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MovementIntent.msg"
  )
-
-ament_python_install_package(${PROJECT_NAME})
-
-install(PROGRAMS
-    local_gamepad/gamepad_node.py
-    DESTINATION lib/${PROJECT_NAME}
-)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from inputs import get_gamepad
-from local_gamepad.msg import MovementIntent
+from global_msgs.msg import MovementIntent
 
 
 # GamepadNode class
