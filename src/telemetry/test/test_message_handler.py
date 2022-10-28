@@ -1,8 +1,4 @@
-import sys
-import os
-
-sys.path.append(os.path.abspath('../telemetry'))
-from message_handler import parse_message, SoftPing
+from telemetry.message_handler import parse_message, SoftPing
 
 
 def test_soft_ping():
