@@ -2,12 +2,13 @@ import asyncio
 from threading import Event
 
 import rclpy
+from rclpy.node import Node
 
 from telemetry.message_handler import parse_message, SoftPing, HardPing, InvalidMessage, RemoteMovementIntent
 from global_msgs.msg import MovementIntent
 
 
-class TCPClient(rclpy.node.Node):
+class TCPClient(Node):
     BUFFER_SIZE = 128
     FAIL_DELAY = 2
 
