@@ -14,6 +14,14 @@ class AbstractMessage(ABC):
         pass
 
 
+class RemoteMovementIntent(AbstractMessage):
+    def __init__(self, data: bytes):
+        if len(data) != 2:
+            raise ValueError(f"The given data is of length: {len(data)} instead of 2")
+        self.drive = (data[0] - 128) / 128
+        self.steering = (data[1] - 128) / 128
+
+
 class BodyOnlyMessage(AbstractMessage):
     def __init__(self, data: bytes):
         self.body = data
@@ -29,7 +37,8 @@ class HardPing(SoftPing):
 
 MESSAGE_TYPES = (
     SoftPing,
-    HardPing
+    HardPing,
+    RemoteMovementIntent
 )
 
 

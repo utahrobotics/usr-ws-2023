@@ -3,7 +3,8 @@ from threading import Event
 
 import rclpy
 
-from message_handler import parse_message, SoftPing, HardPing, InvalidMessage
+from telemetry.message_handler import parse_message, SoftPing, HardPing, InvalidMessage, RemoteMovementIntent
+from local_gamepad.msg import MovementIntent
 
 
 class TCPClient(rclpy.node.Node):
@@ -15,6 +16,8 @@ class TCPClient(rclpy.node.Node):
         # For other processes that need to access the writer,
         # This will stop them if the writer is None
         self.writer_connected = Event()
+
+        self.movement_intent_pub = self.create_publisher(RemoteMovementIntent, 'movement_intent', 10)
 
         asyncio.create_task(self.main_loop())
 
@@ -41,11 +44,15 @@ class TCPClient(rclpy.node.Node):
 
                 if isinstance(result, InvalidMessage):
                     self.get_logger().error(f"Received invalid message header: {result.header}")
-                    continue
 
-                if isinstance(result, (SoftPing, HardPing)):
+                elif isinstance(result, (SoftPing, HardPing)):
                     self.writer.write(data)
-                    continue
+
+                elif isinstance(result, RemoteMovementIntent):
+                    msg = MovementIntent()
+                    msg.drive = result.drive
+                    msg.steering = result.steering
+                    self.movement_intent_pub.publish(msg)
 
             self.writer_connected.clear()
             self.writer = None
