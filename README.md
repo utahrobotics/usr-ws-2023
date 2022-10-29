@@ -55,3 +55,4 @@ Below is a list of things you should read up about
 5. [Python Documentation Guide](https://realpython.com/documenting-python-code/)
 6. [Local Gitignore](https://stackoverflow.com/questions/49305201/gitignore-only-on-local)
 7. [Pytest](https://docs.pytest.org/en/7.1.x/getting-started.html)
+8. [ROS 2 Navigation](https://navigation.ros.org/index.html)
