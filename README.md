@@ -36,7 +36,7 @@ Pylint can be pretty strict, so if you feel that certain warning is unnecessary,
 
 File sizes for scripts should try to stay under 8 KB. Any higher is a sign that you should write a package instead (also refer to Overall). You are strongly encouraged to use existing python libraries to help you. 
 
-It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/humble/Tutorials/Intermediate/Rosdep.html)
+It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html)
 
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
 
@@ -67,7 +67,7 @@ Setup:
 
 ## Reading List
 Below is a list of things you should read up about
-1. [ROS2 Documentation](https://docs.ros.org/en/humble/index.html)
+1. [ROS2 Documentation](https://docs.ros.org/en/foxy/index.html)
 2. [Markdown Guide](https://www.markdownguide.org/)
 3. [ROS2 Simplified Installation](https://docs.google.com/document/d/1emTYbDWZH72I8Ifpqjb3O8foFpgskyILs_1xUKBiDWM/edit?usp=sharing)
 4. [Python Packages Guide](https://realpython.com/python-modules-packages/)
