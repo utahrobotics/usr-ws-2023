@@ -55,3 +55,7 @@ CATKIN_IGNORE
 log/
 
 install/
+
+#VSCode
+.vscode
+.vs/
