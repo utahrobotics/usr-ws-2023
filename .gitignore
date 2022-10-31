@@ -58,3 +58,4 @@ install/
 
 #VSCode
 .vscode
+.vs/
