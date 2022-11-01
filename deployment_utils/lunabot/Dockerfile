@@ -10,11 +10,6 @@ RUN ["/bin/bash", "-c", "echo \"alias colcbuild='colcon build --symlink-install 
 # colctest alias, test with output printed to console
 RUN ["/bin/bash", "-c", "echo \"alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'\" >> /root/.bashrc"]
 
-# Clone workspace
-RUN git clone https://github.com/utahrobotics/usr-ws-2023.git
-
-WORKDIR usr-ws-2023
-
 RUN sudo apt update
 
 # Install realsense 2 ROS
@@ -29,3 +24,6 @@ RUN mkdir -p ~/nav2_ws/src && cd ~/nav2_ws/src
 RUN git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && cd ~/nav2_ws
 RUN rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
 RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && colcon build --symlink-install"]
+
+# Clone workspace
+CMD git clone https://github.com/utahrobotics/usr-ws-2023.git
