@@ -21,6 +21,7 @@ RUN sudo apt update
 RUN sudo apt-get install ros-foxy-realsense2-camera -y
 
 # Install Navigation2 Dependencies
+RUN sudo apt install python3-pip -y
 RUN sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y
 
 # Build Navigation2
