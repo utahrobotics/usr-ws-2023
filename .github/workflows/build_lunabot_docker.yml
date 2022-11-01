@@ -1,11 +1,11 @@
-name: ColconTest
+name: BuildLunabotDocker
 
 on:
   push:
     branches:
       - 'main'
     paths:
-      - 'deployment_utils/lunabot.Dockerfile'
+      - 'deployment_utils/lunabot/Dockerfile'
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
       - name: Build and push test
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:deployment_utils"
+          context: "{{defaultContext}}:deployment_utils/lunabot"
           push: true
           tags: manglemix/usr_docker_repo:lunabot_test
 
@@ -37,6 +37,6 @@ jobs:
       - name: Build and push final
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:deployment_utils"
+          context: "{{defaultContext}}:deployment_utils/lunabot"
           push: true
           tags: manglemix/usr_docker_repo:lunabot
