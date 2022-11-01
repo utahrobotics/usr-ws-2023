@@ -10,9 +10,7 @@ from global_msgs.msg import MovementIntent
 
 
 class TCPClient(Node):
-    """
-    Starts up a TCP socket to communicate with a remote server
-    """
+    """Starts up a TCP socket to communicate with a remote server."""
 
     # The maximum size of a message that we can parse at once
     BUFFER_SIZE = 128
@@ -32,8 +30,7 @@ class TCPClient(Node):
 
     async def main_loop(self):
         """
-        An asynchronous non-returning method that will constantly connect to
-        the remote host on TCP and listen for messsages
+        Constantly connects to the remote host on TCP and listen for messsages.
 
         Upon a connection failure, reconnection will always be attempted
         """
@@ -79,7 +76,8 @@ class TCPClient(Node):
 
     async def connect(self):
         """
-        Connect to the remote server
+        Connect to the remote server.
+
         Uses rosparams to determine the address and port to connect to
         """
         return await asyncio.open_connection(
