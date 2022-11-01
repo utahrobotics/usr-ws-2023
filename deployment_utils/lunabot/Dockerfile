@@ -19,11 +19,15 @@ RUN sudo apt-get install ros-foxy-realsense2-camera -y
 RUN sudo apt install python3-pip -y
 RUN sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y
 
+# Clone Navigation2
+RUN mkdir -p ~/nav2_ws/src && \
+    cd ~/nav2_ws/src && \
+    git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && \
+    cd ~/nav2_ws && \
+    rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
+
 # Build Navigation2
-RUN mkdir -p ~/nav2_ws/src && cd ~/nav2_ws/src
-RUN git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && cd ~/nav2_ws
-RUN rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
-RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && colcon build --symlink-install"]
+RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && cd ~/nav2_ws && colcon build --symlink-install"]
 
 # Clone workspace
 CMD git clone https://github.com/utahrobotics/usr-ws-2023.git
