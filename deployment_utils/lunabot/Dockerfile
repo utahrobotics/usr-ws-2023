@@ -19,3 +19,4 @@ WORKDIR usr-ws-2023
 
 RUN sudo apt update
 RUN sudo apt-get install ros-foxy-realsense2-camera -y
+
