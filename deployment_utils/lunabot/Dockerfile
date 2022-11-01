@@ -3,8 +3,6 @@
 
 FROM osrf/ros:foxy-desktop
 
-# Set up auto-source of workspace for ros user
-ARG WORKSPACE
 # Always source ros setup.bash
 RUN ["/bin/bash", "-c", "echo \"source /opt/ros/foxy/setup.bash\" >> /root/.bashrc"]
 # colcbuild alias, build then source overlay
@@ -19,4 +17,3 @@ WORKDIR usr-ws-2023
 
 RUN sudo apt update
 RUN sudo apt-get install ros-foxy-realsense2-camera -y
-
