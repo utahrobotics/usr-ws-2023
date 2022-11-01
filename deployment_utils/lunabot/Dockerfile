@@ -16,4 +16,15 @@ RUN git clone https://github.com/utahrobotics/usr-ws-2023.git
 WORKDIR usr-ws-2023
 
 RUN sudo apt update
+
+# Install realsense 2 ROS
 RUN sudo apt-get install ros-foxy-realsense2-camera -y
+
+# Install Navigation2 Dependencies
+RUN sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*'
+
+# Build Navigation2
+RUN mkdir -p ~/nav2_ws/src && cd ~/nav2_ws/src
+RUN git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && cd ~/nav2_ws
+RUN rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
+RUN colcon build --symlink-install
