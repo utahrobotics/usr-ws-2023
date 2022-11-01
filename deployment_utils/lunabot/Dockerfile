@@ -28,4 +28,4 @@ RUN sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtl
 RUN mkdir -p ~/nav2_ws/src && cd ~/nav2_ws/src
 RUN git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && cd ~/nav2_ws
 RUN rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
-RUN colcon build --symlink-install
+RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && colcon build --symlink-install"]
