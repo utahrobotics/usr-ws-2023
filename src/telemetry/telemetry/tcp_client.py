@@ -4,7 +4,8 @@ from threading import Event
 import rclpy
 from rclpy.node import Node
 
-from telemetry.message_handler import parse_message, SoftPing, HardPing, InvalidMessage, RemoteMovementIntent
+from telemetry.message_handler import parse_message, SoftPing, HardPing
+from telemetry.message_handler import InvalidMessage, RemoteMovementIntent
 from global_msgs.msg import MovementIntent
 
 
