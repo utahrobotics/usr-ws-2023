@@ -10,8 +10,14 @@ from global_msgs.msg import MovementIntent
 
 
 class TCPClient(Node):
+    """
+    Starts up a TCP socket to communicate with a remote server
+    """
+
+    # The maximum size of a message that we can parse at once
     BUFFER_SIZE = 128
-    FAIL_DELAY = 2
+    # How long to wait to reconnect after a connection failure
+    RECONNECTION_DELAY = 2
 
     def __init__(self):
         super().__init__("tcp_client")
@@ -25,6 +31,12 @@ class TCPClient(Node):
         asyncio.run(self.main_loop())
 
     async def main_loop(self):
+        """
+        An asynchronous non-returning method that will constantly connect to
+        the remote host on TCP and listen for messsages
+
+        Upon a connection failure, reconnection will always be attempted
+        """
         while True:  # outer loop
             while True:  # Connection loop
                 try:
@@ -32,7 +44,7 @@ class TCPClient(Node):
                     break
                 except Exception as e:
                     self.get_logger().error(f"Error in TCPClient: {e}")
-                    await asyncio.sleep(self.FAIL_DELAY)
+                    await asyncio.sleep(self.RECONNECTION_DELAY)
 
             self.writer_connected.set()
             self.get_logger().info("TCP Connection established")
@@ -48,8 +60,12 @@ class TCPClient(Node):
                 if isinstance(result, InvalidMessage):
                     self.get_logger().error(f"Received invalid message header: {result.header}")
 
-                elif isinstance(result, (SoftPing, HardPing)):
+                elif isinstance(result, SoftPing):
                     self.writer.write(data)
+
+                elif isinstance(result, HardPing):
+                    self.writer.write(data)
+                    # TODO Trigger visual change (maybe we can shimmy the wheels)
 
                 elif isinstance(result, RemoteMovementIntent):
                     msg = MovementIntent()
@@ -62,6 +78,10 @@ class TCPClient(Node):
             self.get_logger().info("TCP Connection lost. Reconnecting...")
 
     async def connect(self):
+        """
+        Connect to the remote server
+        Uses rosparams to determine the address and port to connect to
+        """
         return await asyncio.open_connection(
             self.get_parameter("server_addr").get_parameter_value().string_value,
             self.get_parameter("port").get_parameter_value().int_value,
