@@ -1,6 +1,5 @@
 # This is an experimental deployment container that will run on the Jetson Xavier
-# Run the following command on the computer you wish to run this on to build the image:
-# wget https://raw.githubusercontent.com/utahrobotics/usr-ws-2023/main/deployment_utils/Dockerfile && docker build -t "usr:Dockerfile"
+# The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot
 
 FROM osrf/ros:foxy-desktop
 
