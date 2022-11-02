@@ -1,3 +1,4 @@
+import inputs
 import rclpy
 from rclpy.node import Node
 from inputs import get_gamepad
@@ -26,19 +27,22 @@ class GamepadNode(Node):
         drive = 0.0
         steering = 0.0
         while True:
-            events = get_gamepad()
-            self.get_logger().info('Event received')
-            for event in events:
-                # left axis joystick horizontal with deadzone
-                if event.code == 'ABS_X':
-                    steering = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
-                # left axis joystick vertical with deadzone
-                elif event.code == 'ABS_Y':
-                    drive = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
+            try:
+                events = get_gamepad()
+                self.get_logger().info('Event received')
+                for event in events:
+                    # left axis joystick horizontal with deadzone
+                    if event.code == 'ABS_X':
+                        steering = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
+                    # left axis joystick vertical with deadzone
+                    elif event.code == 'ABS_Y':
+                        drive = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
 
-            self.movement_intent.steering = steering
-            self.movement_intent.drive = drive
-            self.publisher.publish(self.movement_intent) # publish movement intent
+                self.movement_intent.steering = steering
+                self.movement_intent.drive = drive
+                self.publisher.publish(self.movement_intent) # publish movement intent
+            except inputs.UnpluggedError:
+                continue
 
 
 def main():
