@@ -29,7 +29,7 @@ RUN mkdir -p ~/nav2_ws/src && \
     rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
 
 # Build Navigation2
-RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && cd ~/nav2_ws && colcon build --symlink-install"]
+# RUN ["/bin/bash", "-c", "source /opt/ros/foxy/setup.bash && cd ~/nav2_ws && colcon build --symlink-install"]
 
 # Install nano
 RUN sudo apt install nano
