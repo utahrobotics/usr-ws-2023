@@ -1,7 +1,7 @@
-import inputs
 import rclpy
 from rclpy.node import Node
 from inputs import get_gamepad
+from inputs import UnpluggedError
 from global_msgs.msg import MovementIntent
 
 
@@ -41,7 +41,7 @@ class GamepadNode(Node):
                 self.movement_intent.steering = steering
                 self.movement_intent.drive = drive
                 self.publisher.publish(self.movement_intent) # publish movement intent
-            except inputs.UnpluggedError:
+            except UnpluggedError:
                 continue
 
 
