@@ -1,0 +1,3 @@
+[submodule "src/apriltag_ros"]
+	path = src/apriltag_ros
+	url = https://github.com/christianrauch/apriltag_ros
