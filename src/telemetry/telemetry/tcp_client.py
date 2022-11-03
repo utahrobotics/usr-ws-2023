@@ -1,5 +1,4 @@
 import asyncio
-from threading import Event
 
 import rclpy
 from rclpy.node import Node
@@ -20,9 +19,6 @@ class TCPClient(Node):
     def __init__(self):
         super().__init__("tcp_client")
         self.writer: asyncio.StreamWriter = None
-        # For other processes that need to access the writer,
-        # This will stop them if the writer is None
-        self.writer_connected = Event()
 
         self.movement_intent_pub = self.create_publisher(MovementIntent, 'movement_intent', 10)
 
@@ -43,7 +39,6 @@ class TCPClient(Node):
                     self.get_logger().error(f"Error in TCPClient: {e}")
                     await asyncio.sleep(self.RECONNECTION_DELAY)
 
-            self.writer_connected.set()
             self.get_logger().info("TCP Connection established")
 
             while True:  # Processing loop
@@ -70,7 +65,6 @@ class TCPClient(Node):
                     msg.steering = result.steering
                     self.movement_intent_pub.publish(msg)
 
-            self.writer_connected.clear()
             self.writer = None
             self.get_logger().info("TCP Connection lost. Reconnecting...")
 
