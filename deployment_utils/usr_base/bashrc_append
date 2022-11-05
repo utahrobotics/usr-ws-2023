@@ -1,0 +1,14 @@
+# source foxy installation
+source /opt/ros/foxy/setup.bash
+# resolve deps, build, then source overlay
+alias colcbuild='rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install && source install/setup.bash'
+# test with output printed to console
+alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'
+
+if [ ! -f /INIT_FLAG ]; then
+    touch /INIT_FLAG
+    echo "-- First time container setup --"
+    # Init rosdep
+    sudo apt update
+    rosdep update
+fi

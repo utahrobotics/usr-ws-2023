@@ -1,20 +1,21 @@
 name: ColconTest
 
 on:
+  workflow_dispatch:
   push:
     paths:
-      - 'src/*'
+      - 'src/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: osrf/ros:foxy-desktop
+    container: manglemix/usr_docker_repo:usr_base
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Build
-        run: "bash -c 'source /opt/ros/foxy/setup.bash && colcon build --symlink-install'"
+        run: "bash -c 'source /root/.bashrc && colcbuild'"
 
       - name: Test
-        run: "bash -c 'source /opt/ros/foxy/setup.bash && colcon test --return-code-on-test-failure --event-handlers console_cohesion+'"
+        run: "bash -c 'source /root/.bashrc && colctest'"

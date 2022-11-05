@@ -1,4 +1,4 @@
-FROM osrf/ros:foxy-desktop
+FROM manglemix/usr_docker_repo:usr_base
 
 #Additional Packages
 
@@ -13,9 +13,3 @@ FROM osrf/ros:foxy-desktop
 
 # Set up auto-source of workspace for ros user
 ARG WORKSPACE
-# Always source ros setup.bash
-RUN ["/bin/bash", "-c", "echo \"source /opt/ros/foxy/setup.bash\" >> /root/.bashrc"]
-# colcbuild alias, build then source overlay
-RUN ["/bin/bash", "-c", "echo \"alias colcbuild='colcon build --symlink-install && source install/setup.bash'\" >> /root/.bashrc"]
-# colctest alias, test with output printed to console
-RUN ["/bin/bash", "-c", "echo \"alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'\" >> /root/.bashrc"]
