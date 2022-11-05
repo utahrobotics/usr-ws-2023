@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build
-        run: "bash -c 'source /root/.bashrc && colcbuild'"
+        shell: bash
+        run: "shopt -s expand_aliases && source /root/.bashrc && colcbuild"
 
       - name: Test
-        run: "bash -c 'source /root/.bashrc && colctest'"
+        shell: bash
+        run: "shopt -s expand_aliases && source /root/.bashrc && colctest"
