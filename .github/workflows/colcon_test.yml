@@ -17,8 +17,9 @@ jobs:
 
       - name: Build
         shell: bash
-        run: "shopt -s expand_aliases && source /root/.bash_aliases && colcbuild"
+        run: "source /opt/ros/foxy/setup.bash && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"
 
       - name: Test
         shell: bash
-        run: "shopt -s expand_aliases && source /root/.bash_aliases && colctest"
+        run: "source /opt/ros/foxy/setup.bash && colcon test --return-code-on-test-failure --event-handlers console_cohesion+"
+
