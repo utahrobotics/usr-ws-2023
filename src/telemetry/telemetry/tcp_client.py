@@ -3,7 +3,7 @@ import asyncio
 import rclpy
 from rclpy.node import Node
 
-from telemetry.message_handler import parse_message, SoftPing, HardPing
+from telemetry.message_handler import parse_message, SoftPing, HardPing, IncompleteMessageException
 from telemetry.message_handler import InvalidMessage, RemoteMovementIntent
 from global_msgs.msg import MovementIntent
 
@@ -41,13 +41,19 @@ class TCPClient(Node):
 
             self.get_logger().info("TCP Connection established")
 
+            data = bytearray()
             while True:  # Processing loop
-                data = await reader.read(self.BUFFER_SIZE)
+                tmp = await reader.read(self.BUFFER_SIZE)
 
-                if len(data) == 0:  # Connection closed
+                if len(tmp) == 0:  # Connection closed
                     break
 
-                result = parse_message(data)
+                data += tmp
+
+                try:
+                    result = parse_message(data)
+                except IncompleteMessageException:
+                    continue
 
                 if isinstance(result, InvalidMessage):
                     self.get_logger().error(f"Received invalid message header: {result.header}")

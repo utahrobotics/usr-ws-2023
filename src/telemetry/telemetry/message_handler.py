@@ -1,12 +1,20 @@
 from abc import ABC, abstractmethod
 
 
+class IncompleteMessageException(Exception):
+    """Raised when parsing of a message could not finish because there was not enough data."""
+
+
 class AbstractMessage(ABC):
     """Represents a valid message that is created from a byte stream."""
 
     @abstractmethod
-    def __init__(self, data: bytes):
-        """Initialize the message with the given bytes. The header must already be stripped."""
+    def __init__(self, data: bytearray):
+        """
+        Initialize the message with the given bytes. The header must still be present.
+
+        Once the message has been sucessfully parsed, it must be removed from data
+        """
         pass
 
 
@@ -19,26 +27,42 @@ class RemoteMovementIntent(AbstractMessage):
     The second byte represents the steering (calculated the same as drive)
     """
 
-    def __init__(self, data: bytes):
-        if len(data) != 2:
-            raise ValueError(f"The given data is of length: {len(data)} instead of 2")
-
-        if data[0] == 255:
-            self.drive = 1
-        else:
-            self.drive = (data[0] - 128) / 128
+    def __init__(self, data: bytearray):
+        if len(data) < 3:
+            raise IncompleteMessageException()
 
         if data[1] == 255:
+            self.drive = 1
+        else:
+            self.drive = (data[1] - 127) / 127
+
+        if data[2] == 255:
             self.steering = 1
         else:
-            self.steering = (data[1] - 128) / 128
+            self.steering = (data[2] - 127) / 127
+
+        del data[0:3]
 
 
 class BodyOnlyMessage(AbstractMessage, ABC):
-    """Represents a message that does no parsing and stores the body."""
+    """
+    Represents a message that does no parsing and stores the body.
 
-    def __init__(self, data: bytes):
-        self.body = data
+    This means that the first two bytes of the body represent the size of the body
+    """
+
+    def __init__(self, data: bytearray):
+        if len(data) < 3:
+            raise IncompleteMessageException()
+
+        size = data[1] * 256 + data[2]
+
+        if len(data) < 3 + size:
+            raise IncompleteMessageException()
+
+        self.body = data[3:3 + size]
+
+        del data[0:3+size]
 
 
 class SoftPing(BodyOnlyMessage):
@@ -65,10 +89,9 @@ MESSAGE_TYPES = (
 )
 
 
-def parse_message(message: bytes):
+def parse_message(message: bytearray):
     """Parse the given byte stream into a valid message."""
     header = message[0]
-    message = message[1::]
 
     if header >= len(MESSAGE_TYPES):
         raise ValueError(f"The following header is unrecognized: {header}")
