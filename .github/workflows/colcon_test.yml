@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'src/**'
+      - ".github/workflows/colcon_test.yml"
 
 jobs:
   test:
