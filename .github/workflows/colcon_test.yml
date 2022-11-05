@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build
-        run: "bash -c 'colcbuild'"
+        run: "bash -c 'source /root/.bashrc && colcbuild'"
 
       - name: Test
-        run: "bash -c 'colctest'"
+        run: "bash -c 'source /root/.bashrc && colctest'"
