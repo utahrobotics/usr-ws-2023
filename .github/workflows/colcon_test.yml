@@ -1,9 +1,10 @@
 name: ColconTest
 
 on:
+  workflow_dispatch:
   push:
     paths:
-      - 'src/*'
+      - 'src/**'
 
 jobs:
   test:
