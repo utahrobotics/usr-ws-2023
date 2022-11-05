@@ -17,8 +17,8 @@ jobs:
 
       - name: Build
         shell: bash
-        run: "shopt -s expand_aliases && source /root/.bashrc && colcbuild"
+        run: "shopt -s expand_aliases && source /root/.bash_aliases && colcbuild"
 
       - name: Test
         shell: bash
-        run: "shopt -s expand_aliases && source /root/.bashrc && colctest"
+        run: "shopt -s expand_aliases && source /root/.bash_aliases && colctest"
