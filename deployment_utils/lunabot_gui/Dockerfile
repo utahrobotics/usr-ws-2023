@@ -71,4 +71,3 @@ COPY start.sh /startup/start.sh
 RUN sudo chmod +x /startup/start.sh
 
 ENTRYPOINT [ "/startup/start.sh" ]
-CMD [ "--wait" ]
