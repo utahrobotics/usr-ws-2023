@@ -1,0 +1,12 @@
+version: "3"
+services:
+  ubuntu-vnc:
+    build:
+      context: .
+    container_name: ubuntu-vnc
+    environment:
+      PASSWORD: 'password'
+      VNC_RESOLUTION: '1440x900'
+    ports:
+      - "2222:22"
+      - "5901:5901"
