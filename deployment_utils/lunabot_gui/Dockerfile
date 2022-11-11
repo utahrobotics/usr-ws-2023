@@ -1,5 +1,6 @@
-# This is an experimental deployment container that will run on the Jetson Xavier
-# The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot
+# This is an experimental deployment image that will run on the Jetson Xavier
+# This image has the ability to present a GUI through a VNC client
+# The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot_gui
 
 FROM manglemix/usr_docker_repo:lunabot
 
@@ -8,7 +9,7 @@ ENV VNC_PORT=5901 \
     DISPLAY=:1 \
     TERM=xterm \
     DEBIAN_FRONTEND=noninteractive \
-    HOME=/home/user \
+    HOME=/root \
     PATH=/opt/TurboVNC/bin:$PATH \
     SSH_PORT=22
 
@@ -52,19 +53,9 @@ RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
     sed -ri 's/^#X11Forwarding\s+.*/X11Forwarding yes/g' /etc/ssh/sshd_config && \
     sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
-
-# Setup another user
-RUN useradd -ms /bin/bash user && \
-    adduser user sudo && \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER user
-WORKDIR $HOME
-
 # Configure X server
 RUN touch ~/.Xauthority && \
     mkdir ~/.vnc
-
-# COPY home/ $HOME/
 
 # Copy in the init script
 COPY start.sh /startup/start.sh
