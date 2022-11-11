@@ -5,9 +5,9 @@ FROM osrf/ros:foxy-desktop
     # Update apt
 RUN sudo apt update && \
     # Install realsense 2 ROS
-    sudo apt-get install ros-foxy-realsense2-camera -y && \
+    sudo apt-get install ros-foxy-realsense2-camera -y --no-install-recommends && \
     # Install nano and pip and Navigation2 dependencies
-    sudo apt install python3-pip ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y && \
+    sudo apt install python3-pip ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends && \
     # Clone Navigation2
     mkdir -p ~/nav2_ws/src && \
     cd ~/nav2_ws/src && \
