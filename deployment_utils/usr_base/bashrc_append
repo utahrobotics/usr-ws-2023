@@ -5,10 +5,9 @@ alias colcbuild='rosdep install --from-paths src -y --ignore-src && colcon build
 # test with output printed to console
 alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'
 
-if [ ! -f /INIT_FLAG ]; then
-    touch /INIT_FLAG
-    echo "-- First time container setup --"
-    # Init rosdep
+if [ ! -f /DEPS_INIT ]; then
+    touch /DEPS_INIT
+    echo "Updating dependencies"
     sudo apt update
     rosdep update
 fi

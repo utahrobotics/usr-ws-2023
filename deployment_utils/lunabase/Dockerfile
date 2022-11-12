@@ -1,5 +1,6 @@
 # This is an experimental deployment image that will run on the Jetson Xavier
 # This image has the ability to present a GUI through a VNC client
+# IMPORTANT NOTE: For this to work, port 5901 of the container must be exposed
 # The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot_gui
 
 FROM manglemix/usr_docker_repo:lunabot
@@ -10,11 +11,9 @@ ENV VNC_PORT=5901 \
     TERM=xterm \
     DEBIAN_FRONTEND=noninteractive \
     HOME=/root \
-    PATH=/opt/TurboVNC/bin:$PATH \
-    SSH_PORT=22
+    PATH=/opt/TurboVNC/bin:$PATH
 
 EXPOSE $VNC_PORT
-EXPOSE $SSH_PORT
 
 # Install shared utils
 RUN apt-get install -y --no-install-recommends \
@@ -37,6 +36,7 @@ RUN apt-get install -y --no-install-recommends \
         xfce4 \
         xfce4-terminal \
         xterm
+
 ENV TVNC_WM=xfce4-session
 
 # Install TurboVNC
@@ -46,19 +46,9 @@ RUN export TVNC_DOWNLOAD_FILE="turbovnc_${TVNC_VERSION}_amd64.deb" && \
     dpkg -i $TVNC_DOWNLOAD_FILE && \
     rm -f $TVNC_DOWNLOAD_FILE
 
-# Configure SSH server
-RUN mkdir -p /var/run/sshd
-RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
-    sed -ri 's/^#AllowTcpForwarding\s+.*/AllowTcpForwarding yes/g' /etc/ssh/sshd_config && \
-    sed -ri 's/^#X11Forwarding\s+.*/X11Forwarding yes/g' /etc/ssh/sshd_config && \
-    sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
-
 # Configure X server
 RUN touch ~/.Xauthority && \
     mkdir ~/.vnc
 
-# Copy in the init script
-COPY start.sh /startup/start.sh
-RUN sudo chmod +x /startup/start.sh
-
-ENTRYPOINT [ "/startup/start.sh" ]
+COPY bashrc_append /
+RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]

@@ -14,8 +14,12 @@ RUN sudo apt update && \
     git clone https://github.com/ros-planning/navigation2.git --branch foxy-devel && \
     cd ~/nav2_ws && \
     # Get dependencies
-    rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy
+    rosdep install -y -r -q --from-paths src --ignore-src --rosdistro foxy && \
+    # build Navigation2
+    bash -c "source /opt/ros/foxy/setup.bash && cd ~/nav2_ws && colcon build --symlink-install"
+
+# ENV DEPS_INITIALIZED=false
 
 COPY bashrc_append /
-# Append bashrc, then build Navigation2
-RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append && source /opt/ros/foxy/setup.bash && cd ~/nav2_ws && colcon build --symlink-install"]
+# Append bashrc
+RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
