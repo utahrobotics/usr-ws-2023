@@ -3,5 +3,7 @@
 
 FROM manglemix/usr_docker_repo:usr_base
 
+ENV CONTEXT=None
+
 COPY bashrc_append /
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
