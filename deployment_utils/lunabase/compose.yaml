@@ -1,0 +1,13 @@
+services:
+  lunabase:
+    image: manglemix/usr_docker_repo:lunabase
+    container_name: lunabase
+    privileged: true
+    tty: true
+    ports:
+      - "5901:5901"
+    working_dir: /usr-ws-2023
+    volumes:
+      - type: bind
+        source: ../../
+        target: /usr-ws-2023

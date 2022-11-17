@@ -1,5 +1,0 @@
-if [ ! -d /usr-ws-2023 ] && [ $CONTEXT == None ]; then
-    echo "Initializing repository"
-    cd /
-    git clone https://github.com/utahrobotics/usr-ws-2023.git && cd usr-ws-2023 && colcbuild && echo "Setup completed! You do not need to rebuild if you just edit Python scripts"
-fi

@@ -1,5 +1,4 @@
 PASSWD_PATH="$HOME/.vnc/passwd"
-PASSWORD="password"
 
 if ! [ -f $PASSWD_PATH ]; then
     # Set the password
