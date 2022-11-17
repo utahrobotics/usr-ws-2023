@@ -1,0 +1,8 @@
+services:
+  lunabase:
+    image: manglemix/usr_docker_repo:lunabase
+    container_name: lunabase
+    privileged: true
+    command: [ "/bin/bash", "-c", "git pull && sleep infinity" ]
+    ports:
+      - "5901:5901"
