@@ -3,7 +3,7 @@ services:
     image: manglemix/usr_docker_repo:lunabase
     container_name: lunabase
     privileged: true
-    command: [ "/bin/bash", "-c", "sleep infinity" ]
+    tty: true
     ports:
       - "5901:5901"
     working_dir: /usr-ws-2023
