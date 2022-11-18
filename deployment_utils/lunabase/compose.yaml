@@ -3,6 +3,7 @@ services:
     image: manglemix/usr_docker_repo:lunabase
     container_name: lunabase
     privileged: true
+    command: git config --global --add safe.directory /usr-ws-2023
     tty: true
     ports:
       - "5901:5901"
