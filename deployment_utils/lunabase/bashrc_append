@@ -9,3 +9,4 @@ if ! [ -f $PASSWD_PATH ]; then
 fi
 
 alias startvnc='vncserver :1 -nohttpd -depth 32 -geometry 1024x640 -name "Lunabase"'
+alias rviz='ros2 run rviz2 rviz2'
