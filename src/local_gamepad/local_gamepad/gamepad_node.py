@@ -8,13 +8,17 @@ from global_msgs.msg import MovementIntent
 # GamepadNode class
 # Broadcasts gamepad joystick information, compatible with
 class GamepadNode(Node):
-    joy_max = 32767 # maximum value for joystick
-    joy_min = -32768 # minimum value for joystick
-    deadzone = 0.1 # deadzone value, can be changed
+    joy_max = 32767  # maximum value for joystick
+    joy_min = -32768  # minimum value for joystick
+    deadzone = 0.1  # deadzone value, can be changed
 
     def __init__(self):
         super().__init__("gamepad_node")
-        self.publisher = self.create_publisher(MovementIntent, "movement_intent", 10)
+        self.publisher = self.create_publisher(
+            MovementIntent,
+            "movement_intent",
+            10
+        )
         self.movement_intent = MovementIntent()
         self.controller()
 
@@ -34,13 +38,15 @@ class GamepadNode(Node):
                     # left axis joystick horizontal with deadzone
                     if event.code == 'ABS_X':
                         steering = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
+                    
                     # left axis joystick vertical with deadzone
                     elif event.code == 'ABS_Y':
                         drive = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
 
                 self.movement_intent.steering = steering
                 self.movement_intent.drive = drive
-                self.publisher.publish(self.movement_intent) # publish movement intent
+                # publish movement intent
+                self.publisher.publish(self.movement_intent)
             except UnpluggedError:
                 continue
 

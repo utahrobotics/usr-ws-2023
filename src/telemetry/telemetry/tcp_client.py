@@ -3,7 +3,8 @@ import asyncio
 import rclpy
 from rclpy.node import Node
 
-from telemetry.message_handler import parse_message, SoftPing, HardPing, IncompleteMessageException
+from telemetry.message_handler import parse_message, SoftPing, HardPing
+from telemetry.message_handler import IncompleteMessageException
 from telemetry.message_handler import RemoteMovementIntent
 from global_msgs.msg import MovementIntent
 
@@ -20,7 +21,11 @@ class TCPClient(Node):
         super().__init__("tcp_client")
         self.writer: asyncio.StreamWriter = None
 
-        self.movement_intent_pub = self.create_publisher(MovementIntent, 'movement_intent', 10)
+        self.movement_intent_pub = self.create_publisher(
+            MovementIntent,
+            'movement_intent',
+            10
+        )
 
         asyncio.run(self.main_loop())
 
@@ -62,7 +67,8 @@ class TCPClient(Node):
 
                 elif isinstance(result, HardPing):
                     self.writer.write(data)
-                    # TODO Trigger visual change (maybe we can shimmy the wheels)
+                    # TODO Trigger visual change
+                    # maybe we can shimmy the wheels
 
                 elif isinstance(result, RemoteMovementIntent):
                     msg = MovementIntent()
@@ -80,8 +86,12 @@ class TCPClient(Node):
         Uses rosparams to determine the address and port to connect to
         """
         return await asyncio.open_connection(
-            self.get_parameter("server_addr").get_parameter_value().string_value,
-            self.get_parameter("port").get_parameter_value().int_value,
+            self.get_parameter("server_addr")
+                .get_parameter_value()
+                .string_value,
+            self.get_parameter("port")
+                .get_parameter_value()
+                .integer_value,
         )
 
 

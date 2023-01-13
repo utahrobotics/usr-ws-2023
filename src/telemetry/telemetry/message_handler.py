@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class IncompleteMessageException(Exception):
-    """Raised when parsing of a message could not finish because there was not enough data."""
+    """
+    Raised when parsing of a message could not finish because
+    there was not enough data.
+    """
 
 
 class AbstractMessage(ABC):
@@ -11,9 +14,11 @@ class AbstractMessage(ABC):
     @abstractmethod
     def __init__(self, data: bytearray):
         """
-        Initialize the message with the given bytes. The header must still be present.
+        Initialize the message with the given bytes.
+        The header must still be present.
 
-        Once the message has been sucessfully parsed, it must be removed from data
+        Once the message has been sucessfully parsed,
+        it must be removed from data
         """
         pass
 
@@ -48,7 +53,8 @@ class BodyOnlyMessage(AbstractMessage, ABC):
     """
     Represents a message that does no parsing and stores the body.
 
-    This means that the first two bytes of the body represent the size of the body
+    This means that the first two bytes of the body represent
+    the size of the body
     """
 
     def __init__(self, data: bytearray):
@@ -77,7 +83,8 @@ class HardPing(SoftPing):
     """
     Represents a Hardware Ping.
 
-    Should be echoed back to the sender, and some sort of visual change must occur in the robot
+    Should be echoed back to the sender,
+    and some sort of visual change must occur in the robot
     """
 
 
