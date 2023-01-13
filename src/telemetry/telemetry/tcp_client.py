@@ -72,7 +72,7 @@ class TCPClient(Node):
                     self.movement_intent_pub.publish(msg)
 
             self.writer = None
-            self.get_logger().info("TCP Connection lost. Reconnecting...")
+            self.get_logger().warn("TCP Connection lost. Reconnecting...")
 
     async def connect(self):
         """
