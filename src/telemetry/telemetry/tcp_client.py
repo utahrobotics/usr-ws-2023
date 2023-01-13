@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 
 from telemetry.message_handler import parse_message, SoftPing, HardPing, IncompleteMessageException
-from telemetry.message_handler import InvalidMessage, RemoteMovementIntent
+from telemetry.message_handler import RemoteMovementIntent
 from global_msgs.msg import MovementIntent
 
 
@@ -54,11 +54,10 @@ class TCPClient(Node):
                     result = parse_message(data)
                 except IncompleteMessageException:
                     continue
+                except ValueError as e:
+                    self.get_logger().error(e)
 
-                if isinstance(result, InvalidMessage):
-                    self.get_logger().error(f"Received invalid message header: {result.header}")
-
-                elif isinstance(result, SoftPing):
+                if isinstance(result, SoftPing):
                     self.writer.write(data)
 
                 elif isinstance(result, HardPing):
