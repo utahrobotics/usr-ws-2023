@@ -2,6 +2,8 @@
 Codebase (and other dependencies) for running our candidate for the 2023 competition
 This document shall contain as much information pertaining to the programming team as possible.
 
+If you are a student of the University of Utah and wish to join the club, please register [here](https://docs.google.com/forms/d/e/1FAIpQLSewC85LVaOSz0tdyHLJZQFhHpkmYDQuEUAnVosGsusocF0oWw/viewform?usp=sf_link).
+
 ## Coding Style
 ### Overall
 Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. Follow the layout of a package as well; There is a rightful place for all files, and putting stuff in the wrong place can lead to confusion.
