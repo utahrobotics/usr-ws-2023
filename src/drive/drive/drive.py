@@ -1,15 +1,17 @@
 import rclpy
 from rclpy.node import Node
 
-from gpiozero import OutputDevice, PWMOutputDevice, InputDevice
+from gpiozero import OutputDevice, PWMOutputDevice, DigitalInputDevice
+from threading import Barrier
+
+from drive.drive_calculator import drive_steering
 
 from global_msgs.msg import MovementIntent
-from global_msgs.srv import DriveStatus
-from drive.drive_calculator import drive_steering
 
 
 class Drive(Node):
     DUTY_FREQUENCY = 10000
+    WAIT_FOR_READY_DURATION = 3
 
     def __init__(self):
         super().__init__("drive")
@@ -40,36 +42,72 @@ class Drive(Node):
                 .get_parameter_value()
                 .integer_value
         )
-        self.front_left_ready_pin = InputDevice(
+        self.front_left_ready_pin = DigitalInputDevice(
             self.get_parameter("front_left_ready_pin")
                 .get_parameter_value()
                 .integer_value
         )
-        self.front_right_ready_pin = InputDevice(
+        self.front_right_ready_pin = DigitalInputDevice(
             self.get_parameter("front_right_ready_pin")
                 .get_parameter_value()
                 .integer_value
         )
-        self.back_left_ready_pin = InputDevice(
+        self.back_left_ready_pin = DigitalInputDevice(
             self.get_parameter("back_left_ready_pin")
                 .get_parameter_value()
                 .integer_value
         )
-        self.back_right_ready_pin = InputDevice(
+        self.back_right_ready_pin = DigitalInputDevice(
             self.get_parameter("back_right_ready_pin")
                 .get_parameter_value()
                 .integer_value
         )
+
+        barrier = Barrier(5)
+        names = ["front_left", "front_right", "back_left", "back_right"]
+        ready = [False, False, False, False]
+
+        def on_activated(idx: int):
+            self.get_logger().info(f"Wheel: {names[idx]} is ready")
+            ready[idx] = True
+            barrier.wait()
+
+        self.front_left_ready_pin.when_activated(
+            lambda: on_activated(0)
+        )
+        self.front_right_ready_pin.when_activated(
+            lambda: on_activated(1)
+        )
+        self.back_left_ready_pin.when_activated(
+            lambda: on_activated(2)
+        )
+        self.back_right_ready_pin.when_activated(
+            lambda: on_activated(3)
+        )
+
+        logger = self.get_logger()
+        while True:
+            barrier.wait(self.WAIT_FOR_READY_DURATION)
+
+            if False in ready:
+                not_ready = []
+
+                for (i, b) in enumerate(ready):
+                    if not b:
+                        not_ready.append(names[i])
+
+                msg = ', '.join(not_ready)
+                logger.warn(f"The following wheels are not ready: {msg}")
+                continue
+
+            logger.info("All wheels ready!")
+            break
+
         self.movement_listener = self.create_subscription(
             MovementIntent,
             'movement_intent',
             self.movement_callback,
             10
-        )
-        self.status_listener = self.create_service(
-            DriveStatus,
-            "drive_status",
-            self.status_callback
         )
 
     def movement_callback(self, msg):
@@ -83,18 +121,7 @@ class Drive(Node):
         self.set_drive(True, right_drive)
         self.set_drive(False, left_drive)
 
-    def status_callback(self, request, response):
-        response.front_left_ready = self.front_left_ready_pin.is_active
-        response.front_right_ready = self.front_right_ready_pin.is_active
-        response.back_left_ready = self.back_left_ready_pin.is_active
-        response.back_right_ready = self.back_right_ready_pin.is_active
-        return response
-
-    def set_drive(
-        self,
-        right: bool,
-        drive: float
-    ):
+    def set_drive(self, right: bool, drive: float):
         if not -1 <= drive <= 1:
             self.get_logger().error(f"Received invalid drive of: {drive}")
             return
