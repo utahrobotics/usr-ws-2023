@@ -1,4 +1,6 @@
 import asyncio
+from multiprocessing import Process
+from typing import Union
 
 import rclpy
 from rclpy.node import Node
@@ -6,6 +8,8 @@ from rclpy.node import Node
 from telemetry.message_handler import parse_message, SoftPing, HardPing
 from telemetry.message_handler import IncompleteMessageException
 from telemetry.message_handler import RemoteMovementIntent
+
+from std_msgs.msg import Empty
 from global_msgs.msg import MovementIntent
 
 
@@ -27,7 +31,17 @@ class TCPClient(Node):
             10
         )
 
-        asyncio.run(self.main_loop())
+        self.hard_ping_pub = self.create_publisher(
+            Empty,
+            'hard_ping',
+            10
+        )
+
+        self.main_loop_process = Process(
+            target=lambda: asyncio.run(self.main_loop()),
+        )
+
+        self.main_loop_process.start()
 
     async def main_loop(self):
         """
@@ -47,6 +61,7 @@ class TCPClient(Node):
             self.get_logger().info("TCP Connection established")
 
             data = bytearray()
+
             while True:  # Processing loop
                 tmp = await reader.read(self.BUFFER_SIZE)
 
@@ -63,12 +78,11 @@ class TCPClient(Node):
                     self.get_logger().error(e)
 
                 if isinstance(result, SoftPing):
-                    self.writer.write(data)
+                    self.send_data(data)
 
                 elif isinstance(result, HardPing):
-                    self.writer.write(data)
-                    # TODO Trigger visual change
-                    # maybe we can shimmy the wheels
+                    self.send_data(data)
+                    self.hard_ping_pub.publish(Empty())
 
                 elif isinstance(result, RemoteMovementIntent):
                     msg = MovementIntent()
@@ -78,6 +92,10 @@ class TCPClient(Node):
 
             self.writer = None
             self.get_logger().warn("TCP Connection lost. Reconnecting...")
+
+    def send_data(self, data: Union[bytes, bytearray]):
+        self.writer.write(data)
+        asyncio.create_task(self.writer.drain())
 
     async def connect(self):
         """
@@ -97,7 +115,10 @@ class TCPClient(Node):
 
 def main():
     rclpy.init()
-    rclpy.spin(TCPClient())
+    client = TCPClient()
+    rclpy.spin(client)
+    # It is not essential to kill the Process, but it is good practice
+    client.main_loop_process.kill()
 
 
 if __name__ == "__main__":
