@@ -1,5 +1,0 @@
----
-bool front_left_ready
-bool front_right_ready
-bool back_left_ready
-bool back_right_ready
