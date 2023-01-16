@@ -49,16 +49,18 @@ class TCPClient(Node):
 
         Upon a connection failure, reconnection will always be attempted
         """
+        logger = self.get_logger()
+
         while True:  # outer loop
             while True:  # Connection loop
                 try:
                     reader, self.writer = await self.connect()
                     break
                 except Exception as e:
-                    self.get_logger().error(f"Error in TCPClient: {e}")
+                    logger.error(f"Error in TCPClient: {e}")
                     await asyncio.sleep(self.RECONNECTION_DELAY)
 
-            self.get_logger().info("TCP Connection established")
+            logger.info("TCP Connection established")
 
             data = bytearray()
 
@@ -75,7 +77,7 @@ class TCPClient(Node):
                 except IncompleteMessageException:
                     continue
                 except ValueError as e:
-                    self.get_logger().error(e)
+                    logger.error(e)
 
                 if isinstance(result, SoftPing):
                     self.send_data(data)
@@ -91,9 +93,13 @@ class TCPClient(Node):
                     self.movement_intent_pub.publish(msg)
 
             self.writer = None
-            self.get_logger().warn("TCP Connection lost. Reconnecting...")
+            logger.warn("TCP Connection lost. Reconnecting...")
 
     def send_data(self, data: Union[bytes, bytearray]):
+        """
+        Sends the given data to the remote server in a separate Task
+        As such, this method will not block the calling thread
+        """
         self.writer.write(data)
         asyncio.create_task(self.writer.drain())
 
