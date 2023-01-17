@@ -17,7 +17,7 @@ jobs:
 
       - name: Build
         shell: bash
-        run: "source /opt/ros/foxy/setup.bash && rosdep update && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"
+        run: "apt-get update && source /opt/ros/foxy/setup.bash && rosdep update && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"
 
       - name: Test
         shell: bash
