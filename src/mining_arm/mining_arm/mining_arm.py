@@ -24,18 +24,15 @@ class MiningArm(Node):
             Float32,
             "arm_angle"
         )
-
-        self.setting_arm_angle = False
-        self.cancel_set_arm_angle = False
-        self.set_cancellation = Event()
         self.arm_angle = 0
         self.arm_angle_update_event = Event()
+        self.updating_arm_angle = True
 
         def update_angle():
             angle_sensor = AngleSensor()
             rate = self.create_rate(self.ANGLE_READ_RATE)
 
-            while True:
+            while self.updating_arm_angle:
                 self.arm_angle = angle_sensor.get_angle()
                 self.arm_angle_update_event.set()
                 self.arm_angle_update_event.clear()
@@ -45,6 +42,10 @@ class MiningArm(Node):
         Thread(
             target=update_angle
         ).start()
+
+        self.setting_arm_angle = False
+        self.cancel_set_arm_angle = False
+        self.set_cancellation = Event()
 
         self.set_arm_angle_server = ActionServer(
             self,
@@ -70,6 +71,7 @@ class MiningArm(Node):
         self.digger_motor.start_heartbeat()
     
     def close(self):
+        self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
         self.digger_motor.stop_heartbeat()
     
