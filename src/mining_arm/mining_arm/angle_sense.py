@@ -70,8 +70,10 @@ class AngleSensor:
         )
 
     def _read(self, mux, data_rate, mode):
-        """Perform an ADC read with the provided mux, gain, data_rate, and mode
-        values.  Returns the signed integer result of the read.
+        """
+        Perform an ADC read with the provided mux, gain, data_rate, and mode values.
+
+        Returns the signed integer result of the read.
         """
         config = ADS1x15_CONFIG_OS_SINGLE  # Go out of power-down mode for conversion.
         # Specify mux value.
@@ -103,8 +105,10 @@ class AngleSensor:
         return self._conversion_value(result[1], result[0])
 
     def start_adc(self, channel, data_rate=None):
-        """Start continuous ADC conversions on the specified channel (0-3). Will
-        return an initial conversion result, then call the get_last_result()
+        """
+        Start continuous ADC conversions on the specified channel (0-3).
+
+        Will return an initial conversion result, then call the get_last_result()
         function to read the most recent conversion result. Call stop_adc() to
         stop conversions.
         """
@@ -114,7 +118,9 @@ class AngleSensor:
         return self._read(channel + 0x04, data_rate, ADS1x15_CONFIG_MODE_CONTINUOUS)
 
     def get_last_result(self):
-        """Read the last conversion result when in continuous conversion mode.
+        """
+        Read the last conversion result when in continuous conversion mode.
+
         Will return a signed integer value.
         """
         # Retrieve the conversion register value, convert to a signed int, and

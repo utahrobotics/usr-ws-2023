@@ -2,10 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class IncompleteMessageException(Exception):
-    """
-    Raised when parsing of a message could not finish because
-    there was not enough data.
-    """
+    """Could not parse message because there was not enough data."""
 
 
 class AbstractMessage(ABC):
@@ -16,8 +13,8 @@ class AbstractMessage(ABC):
     def parse(cls, data: bytearray) -> "AbstractMessage":
         """
         Initialize the message with the given bytes.
-        The header must still be present.
 
+        The header must still be present.
         Once the message has been sucessfully parsed,
         it must be removed from data
         """
@@ -32,6 +29,7 @@ class RemoteMovementIntent(AbstractMessage):
     and value of 255 represents 1.0 drive)
     The second byte represents the steering (calculated the same as drive)
     """
+
     def __init__(self, drive: float, steering: float) -> None:
         self.drive = drive
         self.steering = steering
@@ -56,8 +54,7 @@ class RemoteMovementIntent(AbstractMessage):
 
 
 class NoBodyMessage(AbstractMessage, ABC):
-    """
-    """
+    """Represents a message that has no body."""
 
     @classmethod
     def parse(cls, data: bytearray) -> "AbstractMessage":
@@ -71,6 +68,7 @@ class BodyOnlyMessage(AbstractMessage, ABC):
     This means that the first two bytes of the body represent
     the size of the body
     """
+
     def __init__(self, body: bytes) -> None:
         self.body = body
 

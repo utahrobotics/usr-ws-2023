@@ -97,7 +97,8 @@ class TCPClient(Node):
 
     def send_data(self, data: Union[bytes, bytearray]):
         """
-        Sends the given data to the remote server in a separate Task
+        Send the given data to the remote server in a separate Task.
+
         As such, this method will not block the calling thread
         """
         self.writer.write(data)

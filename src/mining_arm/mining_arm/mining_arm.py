@@ -17,8 +17,12 @@ class MiningArm(Node):
     def __init__(self):
         super().__init__("mining_arm")
 
-        self.arm_motor = VESC(serial_port=self.get_parameter("arm_motor_port").get_parameter_value().string_value)
-        self.digger_motor = VESC(serial_port=self.get_parameter("digger_motor_port").get_parameter_value().string_value)
+        self.arm_motor = VESC(
+            serial_port=self.get_parameter("arm_motor_port").get_parameter_value().string_value
+        )
+        self.digger_motor = VESC(
+            serial_port=self.get_parameter("digger_motor_port").get_parameter_value().string_value
+        )
 
         self.arm_angle_pub = self.create_publisher(
             Float32,
@@ -69,18 +73,18 @@ class MiningArm(Node):
 
         self.arm_motor.start_hearbeat()
         self.digger_motor.start_heartbeat()
-    
+
     def close(self):
         self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
         self.digger_motor.stop_heartbeat()
-    
+
     def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
         if self.setting_arm_angle:
             self.cancel_set_arm_angle = True
             self.set_cancellation.clear()
             self.set_cancellation.wait()
-        
+
         self.setting_arm_angle = True
         self.cancel_set_arm_angle = False
         self.is_arm_vel_set = False
@@ -98,7 +102,10 @@ class MiningArm(Node):
             feedback.difference = diff
             goal_handle.publish_feedback(feedback)
 
-            if goal_handle.is_cancel_requested() or self.is_arm_vel_set or self.cancel_set_arm_angle:
+            if goal_handle.is_cancel_requested() or \
+                    self.is_arm_vel_set or \
+                    self.cancel_set_arm_angle:
+
                 self.set_cancellation.set()
                 self.setting_arm_angle = False
 
@@ -107,7 +114,7 @@ class MiningArm(Node):
 
                 goal_handle.canceled()
                 return SetArmAngle.Result()
-            
+
             if less_than:
                 if diff >= 0:
                     break
