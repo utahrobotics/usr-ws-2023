@@ -25,7 +25,7 @@ anchors = [DeviceCoordinates(0x0001, 1, Coordinates(0, 0, 2000)),
            DeviceCoordinates(0x0004, 1, Coordinates(3000, 3000, 2000)),]
 
 
-class AnchorNode(Node):
+class PozyxNode(Node):
     def __init__(self, port):
         self.pozyx = PozyxSerial(port)
         self.setup()
@@ -87,7 +87,7 @@ def main():
     # port = 'COM1'                             # replace with port of pozyx device
     port = get_serial_ports()[0].device         # should get serial port automatically?     
     rclpy.init()            
-    rclpy.spin(AnchorNode(port))
+    rclpy.spin(PozyxNode(port))
 
 
 if __name__ == "__main__":
