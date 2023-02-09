@@ -152,17 +152,17 @@ class Client(Node):
                     logger.error(str(e))
                     continue
 
-                if isinstance(result, SoftPing):
-                    logger.info("Received Soft Ping")
+                if isinstance(result, HardPing):
+                    logger.info("Received Hard Ping")
+                    hard_ping_pub.publish(Empty())
 
                     try:
                         await send_data(message_to_bytes(result))
                     except BrokenPipeError or ConnectionResetError:
                         break
-
-                elif isinstance(result, HardPing):
-                    logger.info("Received Hard Ping")
-                    hard_ping_pub.publish(Empty())
+                
+                elif isinstance(result, SoftPing):
+                    logger.info("Received Soft Ping")
 
                     try:
                         await send_data(message_to_bytes(result))

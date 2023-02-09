@@ -168,11 +168,11 @@ class Server(Node):
                     logger.error(str(e))
                     continue
 
-                if isinstance(result, SoftPing):
-                    logger.info("Received Soft Ping")
-
-                elif isinstance(result, HardPing):
+                if isinstance(result, HardPing):
                     logger.info("Received Hard Ping")
+
+                elif isinstance(result, SoftPing):
+                    logger.info("Received Soft Ping")
 
                 elif isinstance(result, RemoteMovementIntent):
                     logger.error("Received MovementIntent!?")
