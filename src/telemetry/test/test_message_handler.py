@@ -1,4 +1,5 @@
-from telemetry.message_handler import parse_message, SoftPing, HardPing, RemoteMovementIntent
+from telemetry.message_handler import parse_message, SoftPing, HardPing
+from telemetry.message_handler import RemoteMovementIntent
 from telemetry.message_handler import IncompleteMessageException
 import pytest
 

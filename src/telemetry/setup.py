@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'tcp_client = telemetry.tcp_client:main'
+            'client = telemetry.client:main',
+            'server = telemetry.server:main'
         ],
     },
 )
