@@ -3,7 +3,6 @@ from multiprocessing import Process, Value, Pipe
 from asyncio import Event
 from typing import Union
 from random import randint
-# from concurrent.futures import ThreadPoolExecutor
 
 import rclpy
 from rclpy.node import Node
@@ -59,8 +58,8 @@ class Server(Node):
             10
         )
 
-        def main_loop(port, logger, write_queue, can_write):
-            asyncio.run(self.main_loop(port, logger, write_queue, can_write))
+        def main_loop(*args):
+            asyncio.run(self.main_loop(*args))
 
         self.main_loop_process = Process(
             target=main_loop,
@@ -70,7 +69,9 @@ class Server(Node):
                     .integer_value,
                 self.get_logger(),
                 main_loop_pipe,
-                self.can_write
+                self.can_write,
+                self.RELISTEN_DELAY,
+                self.BUFFER_SIZE
             )
         )
 
@@ -100,13 +101,14 @@ class Server(Node):
             )
         )
 
-    @classmethod
+    @staticmethod
     async def main_loop(
-        cls,
         port: int,
         logger,
         write_pipe,
-        can_write: Value
+        can_write: Value,
+        relisten_delay: int,
+        buffer_size: int
     ):
         """Constantly listens for messages from the client over TCP."""
         logger.info("Server main_loop initiated")
@@ -114,11 +116,11 @@ class Server(Node):
         while True:  # outer loop
             while True:  # Connection loop
                 try:
-                    reader, writer = await cls.get_connection(port)
+                    reader, writer = await Server.get_connection(port)
                     break
                 except Exception as e:
                     logger.error(f"Error in Server: {e}")
-                    await asyncio.sleep(cls.RELISTEN_DELAY)
+                    await asyncio.sleep(relisten_delay)
 
             logger.info(f"TCP Connection established")
 
@@ -128,6 +130,8 @@ class Server(Node):
                 logger.debug(f"Sent {data}")
 
             async def writer_task():
+                # Turn a thread safe pipe into an async pipe
+                # Because they aren't a thing by default
                 data_available = Event()
                 asyncio.get_running_loop().add_reader(
                     write_pipe.fileno(),
@@ -150,7 +154,7 @@ class Server(Node):
 
             while True:  # Processing loop
                 try:
-                    tmp = await reader.read(cls.BUFFER_SIZE)
+                    tmp = await reader.read(buffer_size)
                 except BrokenPipeError:
                     break
 
@@ -194,9 +198,7 @@ class Server(Node):
 
     @staticmethod
     async def get_connection(port):
-        """
-        Wait for a single connection.
-        """
+        """Wait for a single connection."""
         data = []
 
         def on_connection(remote_reader, remote_writer):

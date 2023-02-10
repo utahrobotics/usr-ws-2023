@@ -1,7 +1,6 @@
 import asyncio
 from multiprocessing import Process, Value, Pipe
 from typing import Union
-# from concurrent.futures import ThreadPoolExecutor
 from asyncio import Event
 
 import rclpy
@@ -45,7 +44,7 @@ class Client(Node):
         )
 
         def main_loop(*args):
-            asyncio.run(self.main_loop(*args))
+            asyncio.run(Client.main_loop(*args))
 
         self.main_loop_process = Process(
             target=main_loop,
@@ -68,22 +67,25 @@ class Client(Node):
                     MovementIntent,
                     'movement_intent',
                     10
-                )
+                ),
+                self.RECONNECTION_DELAY,
+                self.BUFFER_SIZE
             )
         )
 
         self.main_loop_process.start()
 
-    @classmethod
+    @staticmethod
     async def main_loop(
-        cls,
         server_addr: str,
         port: int,
         logger,
         write_pipe,
         can_write: Value,
         hard_ping_pub,
-        movement_intent_pub
+        movement_intent_pub,
+        reconnection_delay: int,
+        buffer_size: int
     ):
         """
         Constantly connects to the remote host on TCP and listen for messsages.
@@ -95,13 +97,13 @@ class Client(Node):
         while True:  # outer loop
             while True:  # Connection loop
                 try:
-                    reader, writer = await cls.connect(server_addr, port)
+                    reader, writer = await Client.connect(server_addr, port)
                     break
                 except ConnectionRefusedError:
-                    await asyncio.sleep(cls.RECONNECTION_DELAY)
+                    await asyncio.sleep(reconnection_delay)
                 except Exception as e:
                     logger.error(f"Error in Client: {e}")
-                    await asyncio.sleep(cls.RECONNECTION_DELAY)
+                    await asyncio.sleep(reconnection_delay)
 
             logger.info("TCP Connection established")
 
@@ -111,6 +113,8 @@ class Client(Node):
                 logger.debug(f"Sent {data}")
 
             async def writer_task():
+                # Turn a thread safe pipe into an async pipe
+                # Because they aren't a thing by default
                 data_available = Event()
                 asyncio.get_running_loop().add_reader(
                     write_pipe.fileno(),
@@ -133,7 +137,7 @@ class Client(Node):
 
             while True:  # Processing loop
                 try:
-                    tmp = await reader.read(cls.BUFFER_SIZE)
+                    tmp = await reader.read(buffer_size)
                 except BrokenPipeError:
                     break
 
@@ -160,7 +164,7 @@ class Client(Node):
                         await send_data(message_to_bytes(result))
                     except BrokenPipeError or ConnectionResetError:
                         break
-                
+
                 elif isinstance(result, SoftPing):
                     logger.info("Received Soft Ping")
 
@@ -192,9 +196,7 @@ class Client(Node):
 
     @staticmethod
     async def connect(server_addr: str, port: int):
-        """
-        Connect to the remote server.
-        """
+        """Connect to the remote server."""
         return await asyncio.open_connection(server_addr, port)
 
 
