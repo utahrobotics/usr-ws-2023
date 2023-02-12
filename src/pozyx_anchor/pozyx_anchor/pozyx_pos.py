@@ -46,7 +46,7 @@ class PozyxNode(Node):
         if len(anchors) > 4:
             status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(anchors))
         
-        self.get_logger().info(status)
+        self.get_logger().info(str(status))
         return
 
     def approx_range(self, anchor_id):
