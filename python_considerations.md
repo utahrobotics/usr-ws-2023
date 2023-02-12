@@ -11,7 +11,7 @@ Pylint can be pretty strict, so if you feel that certain warning is unnecessary,
 
 File sizes for scripts should try to stay under 8 KB. Any higher is a sign that you should write a package instead (also refer to [overall.md](https://github.com/utahrobotics/usr-ws-2023/blob/refactor-readme/overall.md)). You are strongly encouraged to use existing python libraries to help you.
 
-It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html)
+It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html).
 
 Type hints are strongly recommended. IDEs like PyCharm can even help you debug your code if you add it. It is a good form of documentation as well.
 
