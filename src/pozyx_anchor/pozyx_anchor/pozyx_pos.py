@@ -31,8 +31,8 @@ class PozyxNode(Node):
         self.pozyx = PozyxSerial(port)
         data = []
         self.setup()
-        # self.approx_loc()
-        self.approx_range(anchors[3])
+        self.approx_loc()
+        # self.approx_range(anchors[3])
 
     def setup(self):
         self.pozyx.clearDevices(remote_id)
