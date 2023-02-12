@@ -36,7 +36,7 @@ class PozyxNode(Node):
 
     def setup(self):
         self.pozyx.clearDevices(remote_id)
-        self.set_anchors_manual()
+        # self.set_anchors_manual()
 
     
     def set_anchors_manual(self):
