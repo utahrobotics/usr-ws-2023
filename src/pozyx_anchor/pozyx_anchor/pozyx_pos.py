@@ -41,7 +41,7 @@ class PozyxNode(Node):
         status = self.pozyx.clearDevices(remote_id)
         for anchor in anchors:
             status &= self.pozyx.addDevice(anchor, remote_id)
-        if len(anchors > 4):
+        if len(anchors) > 4:
             status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(anchors))
         return
 
