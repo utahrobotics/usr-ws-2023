@@ -19,10 +19,10 @@ height = 1000                                       # height of device (shouldn'
 
 # anchors used for positioning, replace device IDs and coordinates
 # this assumes anchors are making a 3000mm x 3000mm grid, all at heights of 2000mm
-anchors = [DeviceCoordinates(0x0001, 1, Coordinates(0, 0, 2000)),
-           DeviceCoordinates(0x0002, 1, Coordinates(3000, 0, 2000)),
-           DeviceCoordinates(0x0003, 1, Coordinates(0, 3000, 2000)),
-           DeviceCoordinates(0x0004, 1, Coordinates(3000, 3000, 2000)),]
+anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 0, 2000)),
+           DeviceCoordinates(0x972d, 1, Coordinates(3000, 0, 2000)),
+           DeviceCoordinates(0x9733, 1, Coordinates(0, 3000, 2000)),
+           DeviceCoordinates(0x762a, 1, Coordinates(3000, 3000, 2000))]
 
 
 class PozyxNode(Node):
