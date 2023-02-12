@@ -1,4 +1,4 @@
-## Overal
+## Overall
 
 Top level directories in `src` should contain *significant* content. The most common type of folder would be a ROS package. Another type would be global dependencies. Creating these should be a team decision. Only add code within the top level directories, and ensure that the code is used in those directories and not anywhere else. Follow the layout of a package as well. There is a rightful place for all files, and putting stuff in the wrong place can lead to confusion.
 
