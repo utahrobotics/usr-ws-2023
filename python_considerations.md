@@ -1,4 +1,4 @@
-We are to follow all of Python's PEP Style Guides. PyCharm (and probably others) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:  # Resolved Warning: <explanation>
+We are to follow all of Python's PEP Style Guides. PyCharm (and probably others) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:  '# Resolved Warning: <explanation>'
 
 All Python scripts shall use 4 spaces per indent, not a tab. If there's one thing to take away from all this, it is this statement. This has caused many issues in the past.
 
@@ -14,4 +14,4 @@ Type hints are strongly recommended. IDEs like PyCharm can even help you debug y
 
 Unit tests shall be done with pytest, which is an extremely simple library.
 
-How to cite python code:  # Taken from <web link>
+How to cite python code:  '# Taken from <web link>'
