@@ -32,7 +32,7 @@ class PozyxNode(Node):
         data = []
         self.setup()
         # self.approx_loc()
-        self.approx_range(anchors[0])
+        self.approx_range(anchors[1])
 
     def setup(self):
         self.pozyx.clearDevices(remote_id)
