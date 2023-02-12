@@ -29,12 +29,6 @@ class PozyxNode(Node):
     def __init__(self, port):
         self.pozyx = PozyxSerial(port)
         data = []
-        self.pozyx.getRead(POZYX_WHO_AM_I, data, remote_id=remote_id)
-        self.get_logger().info('who am i: 0x%0.2x' % data[0])
-        self.get_logger().info('firmware version: 0x%0.2x' % data[1])
-        self.get_logger().info('hardware version: 0x%0.2x' % data[2])
-        self.get_logger().info('self test result: %s' % bin(data[3]))
-        self.get_logger().info('error: 0x%0.2x' % data[4])
         self.setup()
         self.approx_loc()
 
