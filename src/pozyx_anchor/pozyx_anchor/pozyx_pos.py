@@ -92,7 +92,8 @@ class PozyxNode(Node):
 
 def main():
     # port = 'COM1'                             # replace with port of pozyx device
-    port = get_serial_ports()[0].device         # should get serial port automatically?     
+    # port = get_serial_ports()[0].device         # should get serial port automatically?     
+    port = get_first_pozyx_serial_port()
     print(port)
     rclpy.init()            
     rclpy.spin(PozyxNode(port))
