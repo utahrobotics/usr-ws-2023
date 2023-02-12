@@ -1,4 +1,4 @@
-##Python - What to Consider
+## Python - What to Consider
 
 We are to follow all of Python's PEP Style Guides. PyCharm (and probably others) should do this automatically, so just follow all the advice it gives you. Ideally, code should not contain any warnings, so you are strongly encouraged to resolve any you see. If a warning was given incorrectly by your IDE, you should leave a comment as follows:  `# Resolved Warning: <explanation>`
 
