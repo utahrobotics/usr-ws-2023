@@ -28,6 +28,13 @@ anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 0, 2000)),
 class PozyxNode(Node):
     def __init__(self, port):
         self.pozyx = PozyxSerial(port)
+        data = []
+        self.pozyx.getRead(POZYX_WHO_AM_I, data, remote_id=remote_id)
+        print('who am i: 0x%0.2x' % data[0])
+        print('firmware version: 0x%0.2x' % data[1])
+        print('hardware version: 0x%0.2x' % data[2])
+        print('self test result: %s' % bin(data[3]))
+        print('error: 0x%0.2x' % data[4])
         self.setup()
         self.approx_loc()
 
