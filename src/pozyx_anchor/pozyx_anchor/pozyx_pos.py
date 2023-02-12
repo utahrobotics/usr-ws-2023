@@ -27,6 +27,7 @@ anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 3000, 0)),
 
 class PozyxNode(Node):
     def __init__(self, port):
+        super().__init__('pozyx')
         self.pozyx = PozyxSerial(port)
         data = []
         self.setup()
