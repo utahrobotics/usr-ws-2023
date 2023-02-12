@@ -18,11 +18,11 @@ dimension = POZYX_2D                                # positioning dimension (sho
 height = 1000                                       # height of device (shouldn't be needed for our purposes, just in case)
 
 # anchors used for positioning, replace device IDs and coordinates
-# this assumes anchors are making a 3000mm x 3000mm grid, all at heights of 2000mm
-anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 0, 2000)),
-           DeviceCoordinates(0x972d, 1, Coordinates(3000, 0, 2000)),
-           DeviceCoordinates(0x9733, 1, Coordinates(0, 3000, 2000)),
-           DeviceCoordinates(0x762a, 1, Coordinates(3000, 3000, 2000))]
+# this assumes anchors are making a 3000mm x 3000mm grid, all at heights of 0mm
+anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 3000, 0)),
+           DeviceCoordinates(0x972d, 1, Coordinates(3000, 0, 0)),
+           DeviceCoordinates(0x9733, 1, Coordinates(0, 0, 0)),
+           DeviceCoordinates(0x762a, 1, Coordinates(3000, 3000, 0))]
 
 
 class PozyxNode(Node):
@@ -69,6 +69,7 @@ class PozyxNode(Node):
         if network_id is None:
             self.pozyx.getErrorCode(error_code)
             self.get_logger().info(f'ERROR {operation}, local error code {str(error_code)}')
+            # self.get_logger().info(POZYX_ERRORCODE)
             if osc_udp_client is not None:
                 osc_udp_client.send_message("/error", [operation, 0, error_code[0]])
             return
@@ -88,7 +89,7 @@ def main():
     # port = 'COM1'                             # replace with port of pozyx device
     # port = get_serial_ports()[0].device         # should get serial port automatically?     
     port = get_first_pozyx_serial_port()
-    print(port)
+    # print(port)
     rclpy.init()            
     rclpy.spin(PozyxNode(port))
 
