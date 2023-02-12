@@ -30,11 +30,11 @@ class PozyxNode(Node):
         self.pozyx = PozyxSerial(port)
         data = []
         self.pozyx.getRead(POZYX_WHO_AM_I, data, remote_id=remote_id)
-        print('who am i: 0x%0.2x' % data[0])
-        print('firmware version: 0x%0.2x' % data[1])
-        print('hardware version: 0x%0.2x' % data[2])
-        print('self test result: %s' % bin(data[3]))
-        print('error: 0x%0.2x' % data[4])
+        self.get_logger().info('who am i: 0x%0.2x' % data[0])
+        self.get_logger().info('firmware version: 0x%0.2x' % data[1])
+        self.get_logger().info('hardware version: 0x%0.2x' % data[2])
+        self.get_logger().info('self test result: %s' % bin(data[3]))
+        self.get_logger().info('error: 0x%0.2x' % data[4])
         self.setup()
         self.approx_loc()
 
@@ -93,6 +93,7 @@ class PozyxNode(Node):
 def main():
     # port = 'COM1'                             # replace with port of pozyx device
     port = get_serial_ports()[0].device         # should get serial port automatically?     
+    print(port)
     rclpy.init()            
     rclpy.spin(PozyxNode(port))
 
