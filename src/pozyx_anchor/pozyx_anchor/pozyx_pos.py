@@ -21,7 +21,7 @@ height = 1000                                       # height of device (shouldn'
 # this assumes anchors are making a 3000mm x 3000mm grid, all at heights of 0mm
 anchors = [DeviceCoordinates(0x971a, 1, Coordinates(0, 3000, 0)),
            DeviceCoordinates(0x972d, 1, Coordinates(3000, 0, 0)),
-           DeviceCoordinates(0x9733, 1, Coordinates(0, 0, 0)),
+           DeviceCoordinates(0x6733, 1, Coordinates(0, 0, 0)),
            DeviceCoordinates(0x762a, 1, Coordinates(3000, 3000, 0))]
 
 
