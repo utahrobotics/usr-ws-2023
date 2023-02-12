@@ -32,11 +32,11 @@ class PozyxNode(Node):
         data = []
         self.setup()
         # self.approx_loc()
-        self.approx_range(anchors[1])
+        self.approx_range(anchors[3])
 
     def setup(self):
         self.pozyx.clearDevices(remote_id)
-        # self.set_anchors_manual()
+        self.set_anchors_manual()
 
     
     def set_anchors_manual(self):
@@ -45,6 +45,8 @@ class PozyxNode(Node):
             status &= self.pozyx.addDevice(anchor, remote_id)
         if len(anchors) > 4:
             status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(anchors))
+        
+        self.get_logger().info(status)
         return
 
     def approx_range(self, anchor_id):
