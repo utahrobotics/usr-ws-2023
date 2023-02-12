@@ -9,7 +9,7 @@ Pylint is automatically run on each push, so be sure to check it after making yo
 
 Pylint can be pretty strict, so if you feel that certain warning is unnecessary, you can ignore it until you make a pull request. You can bring it up inside the request discussion, and the team lead may consider loosening the restrictions.
 
-File sizes for scripts should try to stay under 8 KB. Any higher is a sign that you should write a package instead (also refer to Overall). You are strongly encouraged to use existing python libraries to help you.
+File sizes for scripts should try to stay under 8 KB. Any higher is a sign that you should write a package instead (also refer to [overall.md](https://github.com/utahrobotics/usr-ws-2023/blob/refactor-readme/overall.md)). You are strongly encouraged to use existing python libraries to help you.
 
 It is very important to note that ROS applications are not run the same way as regular python applications. Installing a package to Python with pip does not mean you can use it in a script that is run with ROS. Refer to [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html)
 
