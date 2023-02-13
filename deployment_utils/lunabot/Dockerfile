@@ -1,6 +1,13 @@
-# This container should start up the entire lunabot program
+# This container should be a complete program for lunabot
+# It shall contain the specific version of the repository and image of lunabotics/base
+# for the robot to run
 
-FROM manglemix/usr_docker_repo:usr_base
+FROM ghcr.io/utahrobotics/lunabotics/base
 
-COPY start.bash /
-ENTRYPOINT [ "/bin/bash", "/start.bash" ]
+ARG REPO_COMMIT_SHA
+
+RUN apt-get update
+RUN git clone https://github.com/utahrobotics/usr-ws-2023.git
+WORKDIR /usr-ws-2023
+RUN git checkout $REPO_COMMIT_SHA
+RUN bash -c "source /opt/ros/foxy/setup.bash && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"

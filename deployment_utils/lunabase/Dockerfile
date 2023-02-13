@@ -1,9 +1,8 @@
-# This is an experimental deployment image that will run on the Jetson Xavier
 # This image has the ability to present a GUI through a VNC client
 # IMPORTANT NOTE: For this to work, port 5901 of the container must be exposed
 # The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot_gui
 
-FROM manglemix/usr_docker_repo:usr_base
+FROM ghcr.io/utahrobotics/lunabotics/base
 
 # Install shared utils and nano
 RUN apt-get install -y --no-install-recommends \

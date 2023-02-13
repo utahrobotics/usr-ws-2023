@@ -1,6 +1,6 @@
 services:
   lunabase:
-    image: manglemix/usr_docker_repo:lunabase
+    image: ghcr.io/utahrobotics/lunabotics/lunabase
     container_name: lunabase
     privileged: true
     tty: true
