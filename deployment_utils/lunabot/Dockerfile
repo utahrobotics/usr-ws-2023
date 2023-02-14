@@ -4,6 +4,7 @@
 
 FROM ghcr.io/utahrobotics/lunabotics/base
 
+# Specify the specific commit of usr-ws-2023 main branch to build
 ARG REPO_COMMIT_SHA
 
 RUN apt-get update
