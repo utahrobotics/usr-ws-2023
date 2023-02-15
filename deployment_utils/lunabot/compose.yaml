@@ -1,0 +1,12 @@
+services:
+  lunabase:
+    image: ghcr.io/utahrobotics/lunabotics/lunabot
+    container_name: lunabot
+    privileged: true
+    tty: true
+    working_dir: /usr-ws-2023
+    command: [
+      "/bin/bash", "-c",
+      # Edit the ros2 run command to customize how lunabot runs
+      "source install/setup.bash && ros2 run telemetry client --ros-args -p \"server_addr:=127.0.0.1\" -p port:=10000"
+    ]
