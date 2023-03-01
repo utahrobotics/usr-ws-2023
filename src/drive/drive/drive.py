@@ -42,66 +42,76 @@ class Drive(Node):
                 .get_parameter_value()
                 .integer_value
         )
-        self.front_left_ready_pin = DigitalInputDevice(
-            self.get_parameter("front_left_ready_pin")
-                .get_parameter_value()
-                .integer_value
-        )
-        self.front_right_ready_pin = DigitalInputDevice(
-            self.get_parameter("front_right_ready_pin")
-                .get_parameter_value()
-                .integer_value
-        )
-        self.back_left_ready_pin = DigitalInputDevice(
-            self.get_parameter("back_left_ready_pin")
-                .get_parameter_value()
-                .integer_value
-        )
-        self.back_right_ready_pin = DigitalInputDevice(
-            self.get_parameter("back_right_ready_pin")
-                .get_parameter_value()
-                .integer_value
-        )
+        # self.front_left_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("front_left_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
+        # self.front_right_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("front_right_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
+        # self.back_left_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("back_left_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
+        # self.back_right_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("back_right_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
+        # self.middle_left_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("middle_left_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
+        # self.middle_right_ready_pin = DigitalInputDevice(
+        #     self.get_parameter("middle_right_ready_pin")
+        #         .get_parameter_value()
+        #         .integer_value
+        # )
 
-        barrier = Barrier(5)
-        names = ["front_left", "front_right", "back_left", "back_right"]
-        ready = [False, False, False, False]
+        # barrier = Barrier(5)
+        # names = ["front_left", "front_right", "back_left", "back_right"]
+        # ready = [False, False, False, False]
 
-        def on_activated(idx: int):
-            self.get_logger().info(f"Wheel: {names[idx]} is ready")
-            ready[idx] = True
-            barrier.wait()
+        # def on_activated(idx: int):
+        #     self.get_logger().info(f"Wheel: {names[idx]} is ready")
+        #     ready[idx] = True
+        #     barrier.wait()
 
-        self.front_left_ready_pin.when_activated(
-            lambda: on_activated(0)
-        )
-        self.front_right_ready_pin.when_activated(
-            lambda: on_activated(1)
-        )
-        self.back_left_ready_pin.when_activated(
-            lambda: on_activated(2)
-        )
-        self.back_right_ready_pin.when_activated(
-            lambda: on_activated(3)
-        )
+        # self.front_left_ready_pin.when_activated(
+        #     lambda: on_activated(0)
+        # )
+        # self.front_right_ready_pin.when_activated(
+        #     lambda: on_activated(1)
+        # )
+        # self.back_left_ready_pin.when_activated(
+        #     lambda: on_activated(2)
+        # )
+        # self.back_right_ready_pin.when_activated(
+        #     lambda: on_activated(3)
+        # )
 
-        logger = self.get_logger()
-        while True:
-            barrier.wait(self.WAIT_FOR_READY_DURATION)
+        # logger = self.get_logger()
+        # while True:
+        #     barrier.wait(self.WAIT_FOR_READY_DURATION)
 
-            if False in ready:
-                not_ready = []
+        #     if False in ready:
+        #         not_ready = []
 
-                for (i, b) in enumerate(ready):
-                    if not b:
-                        not_ready.append(names[i])
+        #         for (i, b) in enumerate(ready):
+        #             if not b:
+        #                 not_ready.append(names[i])
 
-                msg = ', '.join(not_ready)
-                logger.warn(f"The following wheels are not ready: {msg}")
-                continue
+        #         msg = ', '.join(not_ready)
+        #         logger.warn(f"The following wheels are not ready: {msg}")
+        #         continue
 
-            logger.info("All wheels ready!")
-            break
+        #     logger.info("All wheels ready!")
+        #     break
 
         self.movement_listener = self.create_subscription(
             MovementIntent,
