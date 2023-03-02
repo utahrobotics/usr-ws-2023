@@ -50,13 +50,14 @@ RUN export TVNC_DOWNLOAD_FILE="turbovnc_${TVNC_VERSION}_amd64.deb" && \
 RUN touch ~/.Xauthority && \
     mkdir ~/.vnc
 
-# Install gmock then rviz
-RUN mkdir -p ~/rviz2_ws/src && \
-    cd ~/rviz2_ws/src && \
-    git clone https://github.com/ros2/rviz.git --branch foxy --single-branch && \
-    git clone https://github.com/ros/resource_retriever.git --branch foxy --single-branch && \
-    cd .. && \
-    bash -c "source /opt/ros/foxy/setup.bash && colcon build --merge-install"
-    
+# Install rviz2
+RUN apt install -y \
+    ros-foxy-rviz2 \
+    ros-foxy-rviz-common \
+    ros-foxy-rviz-default-plugins \
+    ros-foxy-rviz-visual-tools \
+    ros-foxy-rviz-rendering \
+    ros-foxy-nav2-rviz-plugins
+
 COPY bashrc_append /
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
