@@ -15,3 +15,4 @@ rosdep update
 apt upgrade
 apt install -y libpython3-dev python3-pip
 pip3 install -U argcomplete
+apt install ros-foxy-realsense2-camera ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
