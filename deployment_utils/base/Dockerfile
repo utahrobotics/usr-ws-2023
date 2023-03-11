@@ -27,5 +27,7 @@ RUN apt install ros-foxy-realsense2-camera -y --no-install-recommends
 RUN apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
 
 COPY bashrc_append /
+COPY findusbdev.sh /root
+RUN chmod +x /root/findusbdev.sh
 # Append bashrc
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]

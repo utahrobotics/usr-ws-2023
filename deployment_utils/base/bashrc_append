@@ -6,3 +6,5 @@ alias srcinstall='source install/setup.bash'
 alias colcbuild='rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install && source install/setup.bash'
 # test with output printed to console
 alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'
+# list dev paths for usb devices
+alias findusb='/root/findusbdev.sh'
