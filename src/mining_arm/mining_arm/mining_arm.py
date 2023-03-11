@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 from rclpy.action.server import ServerGoalHandle
+from rcl_interfaces.msg import ParameterDescriptor
 
 from pyvesc import VESC
 from threading import Event, Thread
@@ -17,16 +18,38 @@ class MiningArm(Node):
     def __init__(self):
         super().__init__("mining_arm")
 
-        self.arm_motor = VESC(
-            serial_port=self.get_parameter("arm_motor_port").get_parameter_value().string_value
+        self.declare_parameter(
+            "arm_motor_port",
+            "/dev/ttyACM0",
+            ParameterDescriptor(
+                description="The serial port that the arm motor"
+                " is connected to"
+            )
         )
-        self.digger_motor = VESC(
-            serial_port=self.get_parameter("digger_motor_port").get_parameter_value().string_value
+        self.declare_parameter(
+            "drum_motor_port",
+            "/dev/ttyACM1",
+            ParameterDescriptor(
+                description="The serial port that the drum motor"
+                " is connected to"
+            )
+        )
+
+        self.arm_motor = VESC(
+            serial_port=self.get_parameter("arm_motor_port")
+            .get_parameter_value()
+            .string_value
+        )
+        self.drum_motor = VESC(
+            serial_port=self.get_parameter("drum_motor_port")
+            .get_parameter_value()
+            .string_value
         )
 
         self.arm_angle_pub = self.create_publisher(
             Float32,
-            "arm_angle"
+            "arm_angle",
+            10
         )
         self.arm_angle = 0
         self.arm_angle_update_event = Event()
@@ -62,22 +85,21 @@ class MiningArm(Node):
         self.set_arm_velocity_sub = self.create_subscription(
             Float32,
             "set_arm_velocity",
-            self.set_arm_velocity
+            self.set_arm_velocity,
+            10
         )
 
-        self.set_digger_velocity_sub = self.create_subscription(
+        self.set_drum_velocity_sub = self.create_subscription(
             Float32,
-            "set_digger_velocity",
-            self.set_digger_velocity
+            "set_drum_velocity",
+            self.set_drum_velocity,
+            10
         )
-
-        self.arm_motor.start_hearbeat()
-        self.digger_motor.start_heartbeat()
 
     def close(self):
         self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
-        self.digger_motor.stop_heartbeat()
+        self.drum_motor.stop_heartbeat()
 
     def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
         if self.setting_arm_angle:
@@ -129,16 +151,20 @@ class MiningArm(Node):
 
     def set_arm_velocity(self, msg):
         if not -1 <= msg.data <= 1:
-            self.get_logger().error(f"Received out of bounds arm velocity: {msg.data}")
+            self.get_logger().error(
+                f"Received out of bounds arm velocity: {msg.data}"
+            )
             return
         self.is_arm_vel_set = True
         self.arm_motor.set_duty_cycle(msg.data)
 
-    def set_digger_velocity(self, msg):
+    def set_drum_velocity(self, msg):
         if not -1 <= msg.data <= 1:
-            self.get_logger().error(f"Received out of bounds digger velocity: {msg.data}")
+            self.get_logger().error(
+                f"Received out of bounds drum velocity: {msg.data}"
+            )
             return
-        self.digger_motor.set_duty_cycle(msg.data)
+        self.drum_motor.set_duty_cycle(msg.data)
 
 
 def main():

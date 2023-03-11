@@ -1,7 +1,7 @@
 # source foxy installation
 source /opt/ros/foxy/setup.bash
 # source install
-alias sourceinstall='source install/setup.bash'
+alias srcinstall='source install/setup.bash'
 # resolve deps, build, then source overlay
 alias colcbuild='rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install && source install/setup.bash'
 # test with output printed to console

@@ -31,14 +31,16 @@ class Client(Node):
 
         self.declare_parameter(
             'port',
-            descriptor=ParameterDescriptor(
+            10000,
+            ParameterDescriptor(
                 description='The port to connect to'
             )
         )
 
         self.declare_parameter(
             'server_addr',
-            descriptor=ParameterDescriptor(
+            "127.0.0.1",
+            ParameterDescriptor(
                 description='The address to connect to'
             )
         )
@@ -92,7 +94,7 @@ class Client(Node):
 
         Upon a connection failure, reconnection will always be attempted
         """
-        logger.info("Client main_loop initiated")
+        logger.info(f"Client main_loop initiated to {server_addr}:{port}")
 
         while True:  # outer loop
             while True:  # Connection loop

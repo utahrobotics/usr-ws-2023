@@ -1,12 +1,32 @@
 import rclpy
 from rclpy.node import Node
+from rcl_interfaces.msg import ParameterDescriptor
 
-from gpiozero import OutputDevice, PWMOutputDevice, DigitalInputDevice
-from threading import Barrier
+import Jetson.GPIO as GPIO
+from threading import Event
 
 from drive.drive_calculator import drive_steering
 
 from global_msgs.msg import MovementIntent
+
+
+class Pin:
+    def __init__(self, pin_number: int):
+        self.pin = pin_number
+
+    def setup_output(self) -> "Pin":
+        GPIO.setup(self.pin, GPIO.OUT, initial=GPIO.LOW)
+        return self
+
+    def setup_input(self) -> "Pin":
+        GPIO.setup(self.pin, GPIO.IN)
+        return self
+
+    def set_high(self):
+        GPIO.output(self.pin, GPIO.HIGH)
+
+    def set_low(self):
+        GPIO.output(self.pin, GPIO.LOW)
 
 
 class Drive(Node):
@@ -15,103 +35,215 @@ class Drive(Node):
 
     def __init__(self):
         super().__init__("drive")
-        self.enable_pin = OutputDevice(
+        GPIO.setmode(GPIO.BOARD)
+
+        self.declare_parameter(
+            "enable_pin",
+            11,
+            ParameterDescriptor(
+                description="The pin that enables all drive motors"
+            )
+        )
+
+        self.declare_parameter(
+            "right_duty_pin",
+            32,
+            ParameterDescriptor(
+                description="The pin that controls the speed of"
+                " all motors on the right side"
+            )
+        )
+        self.declare_parameter(
+            "left_duty_pin",
+            33,
+            ParameterDescriptor(
+                description="The pin that controls the speed of"
+                " all motors on the left side"
+            )
+        )
+
+        self.declare_parameter(
+            "right_dir_pin",
+            18,
+            ParameterDescriptor(
+                description="The pin that controls the direction"
+                " (forwards or reverse) of all motors on the right side"
+            )
+        )
+        self.declare_parameter(
+            "left_dir_pin",
+            13,
+            ParameterDescriptor(
+                description="The pin that controls the direction"
+                " (forwards or reverse) of all motors on the left side"
+            )
+        )
+
+        self.declare_parameter(
+            "front_left_ready_pin",
+            23,
+            ParameterDescriptor(
+                description="The pin that controls the speed of"
+                " all motors on the right side"
+            )
+        )
+        self.declare_parameter(
+            "front_right_ready_pin",
+            22,
+            ParameterDescriptor(
+                description="The pin that controls the speed of"
+                " all motors on the left side"
+            )
+        )
+        self.declare_parameter(
+            "back_left_ready_pin",
+            19,
+            ParameterDescriptor(
+                description="The pin that controls the direction"
+                " (forwards or reverse) of all motors on the right side"
+            )
+        )
+        self.declare_parameter(
+            "back_right_ready_pin",
+            26,
+            ParameterDescriptor(
+                description="The pin that controls the direction"
+                " (forwards or reverse) of all motors on the left side"
+            )
+        )
+
+        self.enable_pin = Pin(
             self.get_parameter("enable_pin")
                 .get_parameter_value()
                 .integer_value
-        )
-        self.right_duty_pin = PWMOutputDevice(
+        ).setup_output()
+
+        # GPIO.setup(32, GPIO.OUT)
+        # self.right_duty_pin = GPIO.PWM(32, 100)
+        # GPIO.setup(33, GPIO.OUT)
+        # self.left_duty_pin = GPIO.PWM(33, 100)
+        self.right_duty_pin = Pin(
             self.get_parameter("right_duty_pin")
                 .get_parameter_value()
-                .integer_value,
-            frequency=self.DUTY_FREQUENCY
-        )
-        self.left_duty_pin = PWMOutputDevice(
+                .integer_value
+        ).setup_output()
+        self.left_duty_pin = Pin(
             self.get_parameter("left_duty_pin")
                 .get_parameter_value()
-                .integer_value,
-            frequency=self.DUTY_FREQUENCY
-        )
-        self.right_dir_pin = OutputDevice(
-            self.get_parameter("right_direction_pin")
+                .integer_value
+        ).setup_output()
+
+        self.right_dir_pin = Pin(
+            self.get_parameter("right_dir_pin")
                 .get_parameter_value()
                 .integer_value
-        )
-        self.left_dir_pin = OutputDevice(
-            self.get_parameter("left_direction_pin")
+        ).setup_output()
+        self.left_dir_pin = Pin(
+            self.get_parameter("left_dir_pin")
                 .get_parameter_value()
                 .integer_value
+        ).setup_output()
+
+        front_left_ready_pin = self.get_parameter_or("front_left_ready_pin")  \
+            .get_parameter_value()  \
+            .integer_value
+        front_right_ready_pin = self.get_parameter_or("front_right_ready_pin")\
+            .get_parameter_value()  \
+            .integer_value
+        back_left_ready_pin = self.get_parameter_or("back_left_ready_pin")   \
+            .get_parameter_value()  \
+            .integer_value
+        back_right_ready_pin = self.get_parameter("back_right_ready_pin")   \
+            .get_parameter_value()  \
+            .integer_value
+
+        GPIO.setup(front_left_ready_pin, GPIO.IN)
+        GPIO.setup(front_right_ready_pin, GPIO.IN)
+        GPIO.setup(back_left_ready_pin, GPIO.IN)
+        GPIO.setup(back_right_ready_pin, GPIO.IN)
+
+        front_left_is_ready = Event()
+        front_right_is_ready = Event()
+        back_left_is_ready = Event()
+        back_right_is_ready = Event()
+
+        if GPIO.input(front_left_ready_pin) == GPIO.HIGH:
+            front_left_is_ready.set()
+        if GPIO.input(front_right_ready_pin) == GPIO.HIGH:
+            front_right_is_ready.set()
+        if GPIO.input(back_left_ready_pin) == GPIO.HIGH:
+            back_left_is_ready.set()
+        if GPIO.input(back_right_ready_pin) == GPIO.HIGH:
+            back_right_is_ready.set()
+
+        logger = self.get_logger()
+
+        def on_change(name: str, ready_event: Event, pin_num: int):
+            if GPIO.input(pin_num) == GPIO.HIGH:
+                logger.info(f"{name} wheel is ready")
+                ready_event.set()
+            else:
+                logger.warn(f"{name} wheel unreadied!")
+                ready_event.clear()
+                self.enable_pin.set_low()
+
+        GPIO.add_event_detect(
+            front_left_ready_pin,
+            GPIO.BOTH,
+            callback=lambda pin_num: on_change(
+                "Front left",
+                front_left_is_ready,
+                pin_num
+            )
         )
-        # self.front_left_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("front_left_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
-        # self.front_right_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("front_right_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
-        # self.back_left_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("back_left_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
-        # self.back_right_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("back_right_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
-        # self.middle_left_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("middle_left_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
-        # self.middle_right_ready_pin = DigitalInputDevice(
-        #     self.get_parameter("middle_right_ready_pin")
-        #         .get_parameter_value()
-        #         .integer_value
-        # )
+        GPIO.add_event_detect(
+            front_right_ready_pin,
+            GPIO.BOTH,
+            callback=lambda pin_num: on_change(
+                "Front right",
+                front_right_is_ready,
+                pin_num
+            )
+        )
+        GPIO.add_event_detect(
+            back_left_ready_pin,
+            GPIO.BOTH,
+            callback=lambda pin_num: on_change(
+                "Back left",
+                back_left_is_ready,
+                pin_num
+            )
+        )
+        GPIO.add_event_detect(
+            back_right_ready_pin,
+            GPIO.BOTH,
+            callback=lambda pin_num: on_change(
+                "Back right",
+                back_right_is_ready,
+                pin_num
+            )
+        )
 
-        # barrier = Barrier(5)
-        # names = ["front_left", "front_right", "back_left", "back_right"]
-        # ready = [False, False, False, False]
+        self.ready_events = [
+            front_left_is_ready,
+            front_right_is_ready,
+            back_left_is_ready,
+            back_right_is_ready
+        ]
 
-        # def on_activated(idx: int):
-        #     self.get_logger().info(f"Wheel: {names[idx]} is ready")
-        #     ready[idx] = True
-        #     barrier.wait()
+        # Wait until all wheels are ready
+        # This includes rewaiting for wheels
+        # that unreadied while waiting for other wheels
+        while True:
+            for event in self.ready_events:
+                event.wait()
+            for event in self.ready_events:
+                if not event.is_set():
+                    break
+            else:
+                break
 
-        # self.front_left_ready_pin.when_activated(
-        #     lambda: on_activated(0)
-        # )
-        # self.front_right_ready_pin.when_activated(
-        #     lambda: on_activated(1)
-        # )
-        # self.back_left_ready_pin.when_activated(
-        #     lambda: on_activated(2)
-        # )
-        # self.back_right_ready_pin.when_activated(
-        #     lambda: on_activated(3)
-        # )
-
-        # logger = self.get_logger()
-        # while True:
-        #     barrier.wait(self.WAIT_FOR_READY_DURATION)
-
-        #     if False in ready:
-        #         not_ready = []
-
-        #         for (i, b) in enumerate(ready):
-        #             if not b:
-        #                 not_ready.append(names[i])
-
-        #         msg = ', '.join(not_ready)
-        #         logger.warn(f"The following wheels are not ready: {msg}")
-        #         continue
-
-        #     logger.info("All wheels ready!")
-        #     break
+        logger.info("All wheels ready!")
 
         self.movement_listener = self.create_subscription(
             MovementIntent,
@@ -122,34 +254,57 @@ class Drive(Node):
 
     def movement_callback(self, msg):
         if msg.drive == 0:
-            self.enable_pin.value = 0
+            self.enable_pin.set_low()
             return
 
         left_drive, right_drive = drive_steering(msg.drive, msg.steering)
 
-        self.enable_pin = 1
+        self.enable_pin.set_high()
         self.set_drive(True, right_drive)
         self.set_drive(False, left_drive)
 
-    def set_drive(self, right: bool, drive: float):
-        if not -1 <= drive <= 1:
-            self.get_logger().error(f"Received invalid drive of: {drive}")
+    def set_drive(self, left_drive: float, right_drive: float):
+        if not -1 <= left_drive <= 1:
+            self.get_logger().error(
+                f"Received invalid left drive of: {left_drive}"
+            )
+            return
+        if not -1 <= right_drive <= 1:
+            self.get_logger().error(
+                f"Received invalid right drive of: {right_drive}"
+            )
             return
 
-        if right:
-            dir_pin = self.right_dir_pin
-            drive_pin = self.right_duty_pin
-        else:
-            dir_pin = self.left_dir_pin
-            drive_pin = self.left_duty_pin
+        for ready in self.ready_events:
+            if not ready.is_set():
+                return
 
-        dir_pin.value = int(drive < 0)
-        drive_pin.value = abs(drive)
+        if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
+            self.enable_pin.set_low()
+        else:
+            self.enable_pin.set_high()
+
+        if right_drive < 0:
+            self.right_dir_pin.set_high()
+        else:
+            self.right_dir_pin.set_low()
+
+        if left_drive < 0:
+            self.left_dir_pin.set_high()
+        else:
+            self.left_dir_pin.set_low()
+
+        # TODO Bitbanging
+        # self.right_duty_pin.ChangeDutyCycle(abs(right_drive * 100))
+        # self.left_duty_pin.ChangeDutyCycle(abs(left_drive * 100))
 
 
 def main():
     rclpy.init()
-    rclpy.spin(Drive())
+    drive = Drive()
+    rclpy.spin(drive)
+    GPIO.cleanup()
+    drive.get_logger().info("GPIO Cleaned up")
 
 
 if __name__ == "__main__":

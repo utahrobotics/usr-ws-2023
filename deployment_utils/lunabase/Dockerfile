@@ -50,8 +50,8 @@ RUN export TVNC_DOWNLOAD_FILE="turbovnc_${TVNC_VERSION}_amd64.deb" && \
 RUN touch ~/.Xauthority && \
     mkdir ~/.vnc
 
-# Install rviz2
-RUN apt install -y \
+# # Install rviz2
+RUN apt install -y --no-install-recommends \
     ros-foxy-rviz2 \
     ros-foxy-rviz-common \
     ros-foxy-rviz-default-plugins \

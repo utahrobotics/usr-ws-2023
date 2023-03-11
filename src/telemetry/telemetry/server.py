@@ -32,7 +32,8 @@ class Server(Node):
 
         self.declare_parameter(
             'port',
-            descriptor=ParameterDescriptor(
+            10000,
+            ParameterDescriptor(
                 description='The port to listen on'
             )
         )
@@ -111,7 +112,7 @@ class Server(Node):
         buffer_size: int
     ):
         """Constantly listens for messages from the client over TCP."""
-        logger.info("Server main_loop initiated")
+        logger.info(f"Server main_loop initiated on port: {port}")
 
         while True:  # outer loop
             while True:  # Connection loop

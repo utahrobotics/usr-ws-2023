@@ -58,24 +58,25 @@ drum_radius = 0.195
 
 class AngleSensor:
     def __init__(self, gain=2/3, bus=1):
-        self.bus = smbus.SMBus(1)
+        self.bus = smbus.SMBus(bus)
         self.gain = gain
 
         self.start_adc(0)
 
     def get_angle(self) -> float:
-        self.computeDegrees(
+        return self.computeDegrees(
             5,
             self.computeVolts(self.get_last_result())
         )
 
     def _read(self, mux, data_rate, mode):
         """
-        Perform an ADC read with the provided mux, gain, data_rate, and mode values.
+        Perform an ADC read with the provided mux, gain, data_rate, and mode.
 
         Returns the signed integer result of the read.
         """
-        config = ADS1x15_CONFIG_OS_SINGLE  # Go out of power-down mode for conversion.
+        # Go out of power-down mode for conversion.
+        config = ADS1x15_CONFIG_OS_SINGLE
         # Specify mux value.
         config |= (mux & 0x07) << ADS1x15_CONFIG_MUX_OFFSET
         # Validate the passed in gain and then set it in the config.
@@ -84,8 +85,8 @@ class AngleSensor:
         config |= ADS1x15_CONFIG_GAIN[self.gain]
         # Set the mode (continuous or single shot).
         config |= mode
-        # Get the default data rate if none is specified (default differs between
-        # ADS1015 and ADS1115).
+        # Get the default data rate if none is specified (default differs
+        # between ADS1015 and ADS1115).
         if data_rate is None:
             data_rate = 128
         # Set the data rate (this is controlled by the subclass as it differs
@@ -94,8 +95,11 @@ class AngleSensor:
         config |= ADS1x15_CONFIG_COMP_QUE_DISABLE  # Disble comparator mode.
         # Send the config value to start the ADC conversion.
         # Explicitly break the 16-bit value down to a big endian pair of bytes.
-        self.bus.write_i2c_block_data(ADS1x15_DEFAULT_ADDRESS, ADS1x15_POINTER_CONFIG, [
-                                      (config >> 8) & 0xFF, config & 0xFF])
+        self.bus.write_i2c_block_data(
+            ADS1x15_DEFAULT_ADDRESS,
+            ADS1x15_POINTER_CONFIG,
+            [(config >> 8) & 0xFF, config & 0xFF]
+        )
         # Wait for the ADC sample to finish based on the sample rate plus a
         # small offset to be sure (0.1 millisecond).
         time.sleep(1.0/data_rate+0.0001)
@@ -108,14 +112,18 @@ class AngleSensor:
         """
         Start continuous ADC conversions on the specified channel (0-3).
 
-        Will return an initial conversion result, then call the get_last_result()
-        function to read the most recent conversion result. Call stop_adc() to
-        stop conversions.
+        Will return an initial conversion result, then call the
+        get_last_result() function to read the most recent conversion
+        result. Call stop_adc() to stop conversions.
         """
         assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
         # Start continuous reads and set the mux value to the channel plus
         # the highest bit (bit 3) set.
-        return self._read(channel + 0x04, data_rate, ADS1x15_CONFIG_MODE_CONTINUOUS)
+        return self._read(
+            channel + 0x04,
+            data_rate,
+            ADS1x15_CONFIG_MODE_CONTINUOUS
+        )
 
     def get_last_result(self):
         """

@@ -1,12 +1,28 @@
 # The base image that will serve as the default workspace for Utah Student Robotics programming members
 
-# FROM arm64v8/ros:foxy-ros-base
-FROM ros:foxy-ros-base
+FROM ubuntu:focal
 
-# Update apt and rosdep
-RUN sudo apt update && rosdep update
+# Enable Ubuntu Universe Repository
+RUN apt update
+RUN apt install software-properties-common -y --no-install-recommends && \
+    add-apt-repository universe
+RUN apt install curl nano pip -y --no-install-recommends
+
+# Add ROS 2 GPG key then add the repository to sources list
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+RUN apt update && apt upgrade -y
+
+# Install ROS 2
+RUN apt install ros-foxy-ros-base python3-argcomplete -y --no-install-recommends
+
+# Install GPIO and VESC stuff, and rosdep
+RUN pip install Jetson.GPIO pyvesc rosdep
+# Update rosdep
+RUN rosdep init && rosdep update
+
 # install realsense 2 ROS
-RUN sudo apt install ros-foxy-realsense2-camera -y --no-install-recommends
+RUN apt install ros-foxy-realsense2-camera -y --no-install-recommends
 # Install nav2
 RUN apt install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
 
