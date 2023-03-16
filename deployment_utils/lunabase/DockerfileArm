@@ -1,8 +1,9 @@
 # This image has the ability to present a GUI through a VNC client
 # IMPORTANT NOTE: For this to work, port 5901 of the container must be exposed
 # The latest build of this can be pulled from manglemix/usr_docker_repo:lunabot_gui
+# This is the Arm64 version of lunabase
 
-FROM ghcr.io/utahrobotics/lunabotics/base
+FROM ghcr.io/utahrobotics/lunabotics/base_arm
 
 # Install shared utils and nano
 RUN apt-get install -y --no-install-recommends \
@@ -40,8 +41,8 @@ ENV VNC_PORT=5901 \
 EXPOSE $VNC_PORT
 
 # Install TurboVNC
-RUN export TVNC_DOWNLOAD_FILE="turbovnc_2.2.2_amd64.deb" && \
-    wget -q -O $TVNC_DOWNLOAD_FILE "https://sourceforge.net/projects/turbovnc/files/2.2.2/turbovnc_2.2.2_amd64.deb/download" && \
+RUN export TVNC_DOWNLOAD_FILE="turbovnc_3.0.2_arm64.deb" && \
+    wget -q -O $TVNC_DOWNLOAD_FILE "https://sourceforge.net/projects/turbovnc/files/3.0.2/turbovnc_3.0.2_arm64.deb/download" && \
     dpkg -i $TVNC_DOWNLOAD_FILE && \
     rm -f $TVNC_DOWNLOAD_FILE
 

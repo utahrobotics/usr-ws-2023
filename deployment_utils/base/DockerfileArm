@@ -1,6 +1,7 @@
 # The base image that will serve as the default workspace for Utah Student Robotics programming members
+# This is the Arm64 version of base
 
-FROM ubuntu:focal
+FROM arm64v8/ubuntu:focal
 
 # Enable Ubuntu Universe Repository
 RUN apt-get update

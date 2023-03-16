@@ -2,7 +2,7 @@
 # It shall contain the specific version of the repository and image of lunabotics/base
 # for the robot to run
 
-FROM ghcr.io/utahrobotics/lunabotics/base
+FROM ghcr.io/utahrobotics/lunabotics/base_arm
 
 # Specify the specific commit of usr-ws-2023 main branch to build
 ARG REPO_COMMIT_SHA
