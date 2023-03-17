@@ -1,9 +1,12 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.timer import Rate, Timer
 from rcl_interfaces.msg import ParameterDescriptor
 
 import Jetson.GPIO as GPIO
-from threading import Event
+from multiprocessing import Value
+from threading import Event, Thread
+from itertools import count
 
 from drive.drive_calculator import drive_steering
 
@@ -27,6 +30,64 @@ class Pin:
 
     def set_low(self):
         GPIO.output(self.pin, GPIO.LOW)
+
+
+class PWM:
+    def __init__(self, pin_number: int, rate: int):
+        self._enabled = Event()
+        self._duty_cycle = 0.0
+        self._duty_cycle_changed = Event()
+        self.thr = Thread(
+            target=self._main_loop,
+            args=(
+                pin_number,
+                rate,
+                self._enabled,
+                self.duty_cycle
+            )
+        )
+        self.thr.start()
+
+    @property
+    def duty_cycle(self):
+        return self._duty_cycle
+
+    @property.setter
+    def duty_cycle(self, value):
+        if value == self._duty_cycle:
+            return
+        self._duty_cycle = value
+        self._duty_cycle_changed.set()
+
+    def _main_loop(self, pin_number: int, rate: int):
+        GPIO.setup(pin_number, GPIO.OUT)
+        sleeper = Rate(Timer(timer_period_ns=1_000_000_000 / rate))
+
+        while True:
+            GPIO.output(pin_number, GPIO.LOW)
+            self._enabled.wait()
+            on_cycles = 0
+            ratio = self.duty_cycle
+            self._duty_cycle_changed.clear()
+
+            for cycles in count(1):
+                if self._duty_cycle_changed.is_set():
+                    self._duty_cycle_changed.clear()
+                    break
+
+                if on_cycles / cycles < ratio:
+                    GPIO.output(pin_number, GPIO.HIGH)
+                    on_cycles += 1
+                else:
+                    GPIO.output(pin_number, GPIO.LOW)
+
+                sleeper.sleep()
+
+    def enable(self):
+        self._enabled.set()
+
+    def disable(self):
+        self._enabled.clear()
 
 
 class Drive(Node):
@@ -122,16 +183,16 @@ class Drive(Node):
         # self.right_duty_pin = GPIO.PWM(32, 100)
         # GPIO.setup(33, GPIO.OUT)
         # self.left_duty_pin = GPIO.PWM(33, 100)
-        self.right_duty_pin = Pin(
+        self.right_duty_pin = PWM(
             self.get_parameter("right_duty_pin")
                 .get_parameter_value()
                 .integer_value
-        ).setup_output()
-        self.left_duty_pin = Pin(
+        )
+        self.left_duty_pin = PWM(
             self.get_parameter("left_duty_pin")
                 .get_parameter_value()
                 .integer_value
-        ).setup_output()
+        )
 
         self.right_dir_pin = Pin(
             self.get_parameter("right_dir_pin")
@@ -279,7 +340,10 @@ class Drive(Node):
             if not ready.is_set():
                 return
 
-        if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
+        right_disabled = abs(right_drive) < 0.01
+        left_disabled = abs(left_drive) < 0.01
+
+        if right_disabled and left_disabled:
             self.enable_pin.set_low()
         else:
             self.enable_pin.set_high()
@@ -294,9 +358,18 @@ class Drive(Node):
         else:
             self.left_dir_pin.set_low()
 
-        # TODO Bitbanging
-        # self.right_duty_pin.ChangeDutyCycle(abs(right_drive * 100))
-        # self.left_duty_pin.ChangeDutyCycle(abs(left_drive * 100))
+        if right_disabled:
+            self.right_duty_pin.disable()
+        else:
+            self.right_duty_pin.enable()
+            self.right_duty_pin.duty_cycle = abs(right_drive)
+
+        if left_disabled:
+            self.left_duty_pin.disable()
+        else:
+            self.left_duty_pin.enable()
+            self.left_duty_pin.duty_cycle = abs(left_drive)
+
 
 
 def main():
