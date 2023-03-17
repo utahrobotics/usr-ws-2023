@@ -33,7 +33,7 @@ class Pin:
 
 
 class PWM:
-    def __init__(self, pin_number: int, rate: int):
+    def __init__(self, pin_number: int, frequency: int):
         self._enabled = Event()
         self._duty_cycle = 0.0
         self._duty_cycle_changed = Event()
@@ -41,7 +41,7 @@ class PWM:
             target=self._main_loop,
             args=(
                 pin_number,
-                rate,
+                frequency,
                 self._enabled,
                 self.duty_cycle
             )
@@ -59,9 +59,9 @@ class PWM:
         self._duty_cycle = value
         self._duty_cycle_changed.set()
 
-    def _main_loop(self, pin_number: int, rate: int):
+    def _main_loop(self, pin_number: int, frequency: int):
         GPIO.setup(pin_number, GPIO.OUT)
-        sleeper = Rate(Timer(timer_period_ns=1_000_000_000 / rate))
+        sleeper = Rate(Timer(timer_period_ns=1_000_000_000 / frequency))
 
         while True:
             GPIO.output(pin_number, GPIO.LOW)
@@ -172,6 +172,13 @@ class Drive(Node):
                 " (forwards or reverse) of all motors on the left side"
             )
         )
+        self.declare_parameter(
+            "pwm_frequency",
+            750,
+            ParameterDescriptor(
+                description="The frequency at which we perform PWM"
+            )
+        )
 
         self.enable_pin = Pin(
             self.get_parameter("enable_pin")
@@ -179,6 +186,9 @@ class Drive(Node):
                 .integer_value
         ).setup_output()
 
+        frequency = self.get_parameter("pwm_frequency") \
+            .get_parameter_value() \
+                .integer_value
         # GPIO.setup(32, GPIO.OUT)
         # self.right_duty_pin = GPIO.PWM(32, 100)
         # GPIO.setup(33, GPIO.OUT)
@@ -186,12 +196,14 @@ class Drive(Node):
         self.right_duty_pin = PWM(
             self.get_parameter("right_duty_pin")
                 .get_parameter_value()
-                .integer_value
+                .integer_value,
+            frequency
         )
         self.left_duty_pin = PWM(
             self.get_parameter("left_duty_pin")
                 .get_parameter_value()
-                .integer_value
+                .integer_value,
+            frequency
         )
 
         self.right_dir_pin = Pin(
