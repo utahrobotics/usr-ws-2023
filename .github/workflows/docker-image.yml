@@ -28,6 +28,10 @@ jobs:
         with:
           key: docker-${{ runner.os }}-${{ hashFiles('deployment_utils/lunabase/*.dockerfile', 'deployment_utils/lunabase/*.sh') }}
 
+      - name: Log in to registry
+        # This is where you will update the personal access token to GITHUB_TOKEN
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
       - uses: actions/checkout@v3
       
       - name: Build AMD64 base
