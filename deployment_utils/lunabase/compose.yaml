@@ -1,6 +1,6 @@
 services:
   lunabase:
-    image: ghcr.io/utahrobotics/lunabotics/lunabase
+    image: ghcr.io/utahrobotics/lunabotics/base
     container_name: lunabase
     privileged: true
     tty: true

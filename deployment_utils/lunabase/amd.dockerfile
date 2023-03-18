@@ -1,3 +1,3 @@
 # syntax = edrevo/dockerfile-plus
-FROM arm64v8/ubuntu:focal as base
+FROM ubuntu:focal AS base
 INCLUDE+ common.dockerfile
