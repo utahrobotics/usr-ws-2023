@@ -61,27 +61,26 @@ class PWM:
 
     def _main_loop(self, pin_number: int, frequency: int):
         GPIO.setup(pin_number, GPIO.OUT)
-        sleeper = Rate(Timer(timer_period_ns=1_000_000_000 / frequency))
 
         while True:
             GPIO.output(pin_number, GPIO.LOW)
             self._enabled.wait()
-            on_cycles = 0
             ratio = self.duty_cycle
             self._duty_cycle_changed.clear()
 
-            for cycles in count(1):
+            onSleeper = Rate(Timer(timer_period_ns=1_000_000_000 * ratio / frequency))
+            offSleeper = Rate(Timer(timer_period_ns=1_000_000_000 * (1 - ratio) / frequency))
+
+            while True:
                 if self._duty_cycle_changed.is_set():
                     self._duty_cycle_changed.clear()
                     break
 
-                if on_cycles / cycles < ratio:
-                    GPIO.output(pin_number, GPIO.HIGH)
-                    on_cycles += 1
-                else:
-                    GPIO.output(pin_number, GPIO.LOW)
-
-                sleeper.sleep()
+                GPIO.output(pin_number, GPIO.HIGH)
+                onSleeper.sleep()
+                
+                GPIO.output(pin_number, GPIO.LOW)
+                offSleeper.sleep()
 
     def enable(self):
         self._enabled.set()
