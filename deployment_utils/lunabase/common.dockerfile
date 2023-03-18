@@ -81,11 +81,7 @@ RUN touch ~/.Xauthority && \
 # # Install rviz2
 RUN apt-get install -y --no-install-recommends \
     ros-foxy-rviz2 \
-    ros-foxy-rviz-common \
-    ros-foxy-rviz-default-plugins \
-    ros-foxy-rviz-visual-tools \
-    ros-foxy-rviz-rendering \
-    ros-foxy-nav2-rviz-plugins
+    ros-foxy-rviz-visual-tools
 
 COPY lunabase_bashrc_append.sh /bashrc_append
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
