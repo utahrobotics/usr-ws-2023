@@ -18,6 +18,8 @@ RUN apt-get install ros-foxy-ros-base python3-argcomplete -y --no-install-recomm
 
 # Install GPIO and VESC stuff, and rosdep
 RUN pip install Jetson.GPIO pyvesc rosdep
+# Install colcon and build essentials
+RUN apt-get install python3-colcon-common-extensions build-essential -y --no-install-recommends
 # Update rosdep
 RUN rosdep init && rosdep update
 
@@ -26,7 +28,7 @@ RUN apt-get install ros-foxy-realsense2-camera -y --no-install-recommends
 # Install nav2
 RUN apt-get install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
 # Install usbutils
-RUN apt-get install usbutils
+RUN apt-get install usbutils -y --no-install-recommends
 
 COPY bashrc_append /
 COPY findusbdev.sh /root
