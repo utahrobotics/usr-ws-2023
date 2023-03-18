@@ -4,9 +4,7 @@ from rclpy.timer import Rate, Timer
 from rcl_interfaces.msg import ParameterDescriptor
 
 import Jetson.GPIO as GPIO
-from multiprocessing import Value
 from threading import Event, Thread
-from itertools import count
 
 from drive.drive_calculator import drive_steering
 
@@ -53,7 +51,7 @@ class PWM:
         return self._duty_cycle
 
     @property.setter
-    def duty_cycle(self, value):
+    def set_duty_cycle(self, value):
         if value == self._duty_cycle:
             return
         self._duty_cycle = value
@@ -78,7 +76,7 @@ class PWM:
 
                 GPIO.output(pin_number, GPIO.HIGH)
                 onSleeper.sleep()
-                
+
                 GPIO.output(pin_number, GPIO.LOW)
                 offSleeper.sleep()
 
@@ -187,7 +185,7 @@ class Drive(Node):
 
         frequency = self.get_parameter("pwm_frequency") \
             .get_parameter_value() \
-                .integer_value
+            .integer_value
         # GPIO.setup(32, GPIO.OUT)
         # self.right_duty_pin = GPIO.PWM(32, 100)
         # GPIO.setup(33, GPIO.OUT)
@@ -380,7 +378,6 @@ class Drive(Node):
         else:
             self.left_duty_pin.enable()
             self.left_duty_pin.duty_cycle = abs(left_drive)
-
 
 
 def main():
