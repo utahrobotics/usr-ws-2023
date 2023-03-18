@@ -26,6 +26,8 @@ RUN rosdep init && rosdep update
 RUN apt-get install ros-foxy-realsense2-camera -y --no-install-recommends
 # Install nav2
 RUN apt-get install ros-foxy-navigation2 ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
+# Install usbutils
+RUN apt-get install usbutils
 
 COPY bashrc_append /
 COPY findusbdev.sh /root
