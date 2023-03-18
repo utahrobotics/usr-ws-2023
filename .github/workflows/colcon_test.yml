@@ -10,7 +10,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: manglemix/usr_docker_repo:usr_base
+    container: ghcr.io/utahrobotics/lunabotics/base
     steps:
       - name: Checkout
         uses: actions/checkout@v3
