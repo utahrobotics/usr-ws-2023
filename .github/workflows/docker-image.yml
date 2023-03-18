@@ -1,0 +1,46 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths: 
+      - 'deployment_utils/lunabase/*.dockerfile'
+      - 'deployment_utils/lunabase/*.sh'
+  pull_request:
+    branches: [ "main" ]
+    paths: 
+      - 'deployment_utils/lunabase/*.dockerfile'
+      - 'deployment_utils/lunabase/*.sh'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cache Docker images.
+        uses: ScribeMD/docker-cache@0.3.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('deployment_utils/lunabase/*.dockerfile', 'deployment_utils/lunabase/*.sh') }}
+
+      - uses: actions/checkout@v3
+      
+      - name: Build AMD64
+        run: docker build deployment_utils/lunabase/ --file amd.dockerfile
+      
+      - name: Push AMD64 base
+        run: docker image tag base ghcr.io/utahrobotics/lunabotics/base && docker image push ghcr.io/utahrobotics/lunabotics/base
+      
+      - name: Push AMD64 lunabase
+        run: docker image tag lunabase ghcr.io/utahrobotics/lunabotics/lunabase && docker image push ghcr.io/utahrobotics/lunabotics/lunabase
+      
+      - name: Build ARM
+        run: docker build deployment_utils/lunabase/ --file arm.dockerfile
+      
+      - name: Push ARM base
+        run: docker image tag base ghcr.io/utahrobotics/lunabotics/base_arm && docker image push ghcr.io/utahrobotics/lunabotics/base_arm
+      
+      - name: Push ARM lunabase
+        run: docker image tag lunabase ghcr.io/utahrobotics/lunabotics/lunabase_arm && docker image push ghcr.io/utahrobotics/lunabotics/lunabase_arm
