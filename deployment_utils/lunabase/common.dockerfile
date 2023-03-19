@@ -34,8 +34,6 @@ RUN chmod +x /root/findusbdev.sh
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
 
 FROM base as lunabase
-
-# Download url for TurboVNC
 ARG TNVC_URL
 
 # Install shared utils
@@ -88,13 +86,3 @@ RUN apt-get install -y --no-install-recommends \
 
 COPY lunabase_bashrc_append.sh /bashrc_append
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
-
-FROM base as lunabot
-
-# Specify the specific commit of usr-ws-2023 main branch to build
-ARG REPO_COMMIT_SHA
-
-RUN git clone https://github.com/utahrobotics/usr-ws-2023.git
-WORKDIR /usr-ws-2023
-RUN git checkout $REPO_COMMIT_SHA
-RUN bash -c "source /opt/ros/foxy/setup.bash && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"
