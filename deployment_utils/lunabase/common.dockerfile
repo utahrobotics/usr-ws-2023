@@ -34,6 +34,8 @@ RUN chmod +x /root/findusbdev.sh
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
 
 FROM base as lunabase
+ARG TNVC_URL
+
 # Install shared utils
 RUN apt-get install -y --no-install-recommends \
         apt-utils \
@@ -69,10 +71,9 @@ ENV VNC_PORT=5901 \
 EXPOSE $VNC_PORT
 
 # Install TurboVNC
-RUN export TVNC_DOWNLOAD_FILE="turbovnc_2.2.2_amd64.deb" && \
-    wget -q -O $TVNC_DOWNLOAD_FILE "https://sourceforge.net/projects/turbovnc/files/2.2.2/turbovnc_2.2.2_amd64.deb/download" && \
-    dpkg -i $TVNC_DOWNLOAD_FILE && \
-    rm -f $TVNC_DOWNLOAD_FILE
+RUN wget -q -O tvnc_download.deb $TNVC_URL && \
+    dpkg -i tvnc_download.deb && \
+    rm -f tvnc_download.deb
 
 # Configure X server
 RUN touch ~/.Xauthority && \
