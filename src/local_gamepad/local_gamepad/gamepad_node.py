@@ -35,13 +35,18 @@ class GamepadNode(Node):
                 events = get_gamepad()
                 self.get_logger().info('Event received')
                 for event in events:
+                    value = self.joy_normalize(event.state)
+
+                    if abs(value) <= self.deadzone:
+                        value = 0
+
                     # left axis joystick horizontal with deadzone
                     if event.code == 'ABS_X':
-                        steering = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
-                    
+                        steering = value
+
                     # left axis joystick vertical with deadzone
                     elif event.code == 'ABS_Y':
-                        drive = value if abs(value := self.joy_normalize(event.state)) > self.deadzone else 0.0
+                        drive = value
 
                 self.movement_intent.steering = steering
                 self.movement_intent.drive = drive
