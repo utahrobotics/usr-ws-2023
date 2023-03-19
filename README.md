@@ -1,4 +1,7 @@
 # usr-ws-2023
+[![BuildDockerImages](https://github.com/utahrobotics/usr-ws-2023/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/utahrobotics/usr-ws-2023/actions/workflows/docker-image.yml)
+[![ColconTest](https://github.com/utahrobotics/usr-ws-2023/actions/workflows/colcon-test.yml/badge.svg)](https://github.com/utahrobotics/usr-ws-2023/actions/workflows/colcon-test.yml)
+
 Codebase (and other dependencies) for running our candidate for the 2023 competition
 This document shall contain as much information pertaining to the programming team as possible.
 

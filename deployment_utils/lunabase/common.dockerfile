@@ -24,8 +24,8 @@ RUN apt-get install ros-foxy-realsense2-camera -y --no-install-recommends
 # Install nav2 components as separate layers (to make it easier to upload and cache)
 RUN apt-get install ros-foxy-navigation2 -y --no-install-recommends
 RUN apt-get install ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
-# Install usbutils and nano
-RUN apt-get install usbutils nano -y --no-install-recommends
+# Install usbutils, nano, and git
+RUN apt-get install usbutils nano git -y --no-install-recommends
 
 COPY base_bashrc_append.sh /bashrc_append
 COPY findusbdev.sh /root
