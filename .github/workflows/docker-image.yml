@@ -24,7 +24,7 @@ jobs:
       - name: Cache Docker images.
         uses: ScribeMD/docker-cache@0.3.0
         with:
-          key: docker-${{ runner.os }}-${{ hashFiles('deployment_utils/lunabase/common.dockerfile', 'deployment_utils/lunabase/amd.dockerfile', 'deployment_utils/lunabase/*.sh') }}
+          key: docker-amd64
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
@@ -54,7 +54,7 @@ jobs:
       - name: Cache Docker images.
         uses: ScribeMD/docker-cache@0.3.0
         with:
-          key: docker-${{ runner.os }}-${{ hashFiles('deployment_utils/lunabase/common.dockerfile', 'deployment_utils/lunabase/arm.dockerfile', 'deployment_utils/lunabase/*.sh') }}
+          key: docker-arm
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
