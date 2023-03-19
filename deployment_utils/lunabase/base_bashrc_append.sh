@@ -8,3 +8,10 @@ alias colcbuild='rosdep install --from-paths src -y --ignore-src && colcon build
 alias colctest='colcon test --return-code-on-test-failure --event-handlers console_cohesion+'
 # list dev paths for usb devices
 alias findusb='/root/findusbdev.sh'
+# delete all generated files in the current directory
+alias colcclean='
+if [ "$PWD" = "/usr-ws-2023" ]; then
+    rm -rf build install log
+else
+    echo "Not in usr-ws-2023"
+fi'
