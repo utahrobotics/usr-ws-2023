@@ -5,13 +5,13 @@ on:
   push:
     branches: [ "main" ]
     paths: 
-      - 'deployment_utils/lunabase/*.dockerfile'
-      - 'deployment_utils/lunabase/*.sh'
+      - 'deployment_utils/*.dockerfile'
+      - 'deployment_utils/*.sh'
   pull_request:
     branches: [ "main" ]
     paths: 
-      - 'deployment_utils/lunabase/*.dockerfile'
-      - 'deployment_utils/lunabase/*.sh'
+      - 'deployment_utils/*.dockerfile'
+      - 'deployment_utils/*.sh'
 
 jobs:
   build_amd64:
@@ -33,13 +33,13 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Build AMD64 base
-        run: docker build deployment_utils/lunabase/ --file deployment_utils/lunabase/amd.dockerfile --target base --tag ghcr.io/utahrobotics/lunabotics/base
+        run: docker build deployment_utils/lunabase/ --file deployment_utils/amd.dockerfile --target base --tag ghcr.io/utahrobotics/lunabotics/base
       
       - name: Push AMD64 base
         run: docker image push ghcr.io/utahrobotics/lunabotics/base
       
       - name: Build AMD64 lunabase
-        run: docker build deployment_utils/lunabase/ --file deployment_utils/lunabase/amd.dockerfile --target lunabase --tag ghcr.io/utahrobotics/lunabotics/lunabase --build-arg TNVC_URL=https://sourceforge.net/projects/turbovnc/files/3.0.2/turbovnc_3.0.2_amd64.deb/download
+        run: docker build deployment_utils/lunabase/ --file deployment_utils/amd.dockerfile --target lunabase --tag ghcr.io/utahrobotics/lunabotics/lunabase --build-arg TNVC_URL=https://sourceforge.net/projects/turbovnc/files/3.0.2/turbovnc_3.0.2_amd64.deb/download
       
       - name: Push AMD64 lunabase
         run: docker image push ghcr.io/utahrobotics/lunabotics/lunabase
@@ -69,13 +69,13 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Build ARM64 base
-        run: docker build deployment_utils/lunabase/ --file deployment_utils/lunabase/arm.dockerfile --target base --tag ghcr.io/utahrobotics/lunabotics/base_arm
+        run: docker build deployment_utils/lunabase/ --file deployment_utils/arm.dockerfile --target base --tag ghcr.io/utahrobotics/lunabotics/base_arm
       
       - name: Push ARM64 base
         run: docker image push ghcr.io/utahrobotics/lunabotics/base_arm
       
       - name: Build ARM64 lunabase
-        run: docker build deployment_utils/lunabase/ --file deployment_utils/lunabase/arm.dockerfile --target lunabase --tag ghcr.io/utahrobotics/lunabotics/lunabase_arm --build-arg TNVC_URL=https://sourceforge.net/projects/turbovnc/files/3.0.2/turbovnc_3.0.2_arm64.deb/download
+        run: docker build deployment_utils/lunabase/ --file deployment_utils/arm.dockerfile --target lunabase --tag ghcr.io/utahrobotics/lunabotics/lunabase_arm --build-arg TNVC_URL=https://sourceforge.net/projects/turbovnc/files/3.0.2/turbovnc_3.0.2_arm64.deb/download
       
       - name: Push ARM64 lunabase
         run: docker image push ghcr.io/utahrobotics/lunabotics/lunabase_arm
