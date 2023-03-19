@@ -54,7 +54,10 @@ jobs:
         uses: ScribeMD/docker-cache@0.3.0
         with:
           key: docker-${{ runner.os }}-${{ hashFiles('deployment_utils/lunabase/common.dockerfile', 'deployment_utils/lunabase/arm.dockerfile', 'deployment_utils/lunabase/*.sh') }}
-        
+          
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
