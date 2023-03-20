@@ -4,6 +4,7 @@ services:
     container_name: lunabase
     privileged: true
     tty: true
+    pull_policy: always
     ports:
       - "5901:5901"
     working_dir: /usr-ws-2023
