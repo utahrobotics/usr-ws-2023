@@ -3,6 +3,8 @@ from rclpy.node import Node
 from inputs import get_gamepad
 from inputs import UnpluggedError
 from global_msgs.msg import MovementIntent
+from threading import Thread
+from inputs import devices
 
 
 # GamepadNode class
@@ -19,8 +21,10 @@ class GamepadNode(Node):
             "movement_intent",
             10
         )
-        self.movement_intent = MovementIntent()
-        self.controller()
+
+        for device in devices:
+            self.get_logger().info(str(device))
+        Thread(target=self.controller).start()
 
     # normalizes joystick values on a range from [-1,1]
     def joy_normalize(self, val):
@@ -28,8 +32,10 @@ class GamepadNode(Node):
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
+        self.get_logger().info('Event loop started')
         drive = 0.0
         steering = 0.0
+        movement_intent = MovementIntent()
         while True:
             try:
                 events = get_gamepad()
@@ -48,8 +54,8 @@ class GamepadNode(Node):
                     elif event.code == 'ABS_Y':
                         drive = value
 
-                self.movement_intent.steering = steering
-                self.movement_intent.drive = drive
+                movement_intent.steering = steering
+                movement_intent.drive = drive
                 # publish movement intent
                 self.publisher.publish(self.movement_intent)
             except UnpluggedError:
