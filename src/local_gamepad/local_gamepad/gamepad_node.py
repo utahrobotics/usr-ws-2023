@@ -22,8 +22,6 @@ class GamepadNode(Node):
             10
         )
 
-        for device in devices:
-            self.get_logger().info(str(device))
         Thread(target=self.controller).start()
 
     # normalizes joystick values on a range from [-1,1]
@@ -32,7 +30,6 @@ class GamepadNode(Node):
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
-        self.get_logger().info('Event loop started')
         drive = 0.0
         steering = 0.0
         movement_intent = MovementIntent()
