@@ -39,7 +39,6 @@ class GamepadNode(Node):
         while True:
             try:
                 events = get_gamepad()
-                self.get_logger().info('Event received')
                 for event in events:
                     value = self.joy_normalize(event.state)
 
@@ -48,16 +47,16 @@ class GamepadNode(Node):
 
                     # left axis joystick horizontal with deadzone
                     if event.code == 'ABS_X':
-                        steering = value
+                        steering = float(value)
 
                     # left axis joystick vertical with deadzone
                     elif event.code == 'ABS_Y':
-                        drive = value
+                        drive = float(value)
 
                 movement_intent.steering = steering
                 movement_intent.drive = drive
                 # publish movement intent
-                self.publisher.publish(self.movement_intent)
+                self.publisher.publish(movement_intent)
             except UnpluggedError:
                 continue
 
