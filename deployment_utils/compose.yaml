@@ -9,5 +9,5 @@ services:
     working_dir: /usr-ws-2023
     volumes:
       - type: bind
-        source: ../../
+        source: ../
         target: /usr-ws-2023
