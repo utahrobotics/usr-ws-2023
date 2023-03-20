@@ -10,8 +10,8 @@ from inputs import devices
 # GamepadNode class
 # Broadcasts gamepad joystick information, compatible with
 class GamepadNode(Node):
-    joy_max = 32767  # maximum value for joystick
-    joy_min = -32768  # minimum value for joystick
+    joy_max = 255  # maximum value for joystick
+    joy_min = -255  # minimum value for joystick
     deadzone = 0.1  # deadzone value, can be changed
 
     def __init__(self):
@@ -26,13 +26,12 @@ class GamepadNode(Node):
 
     # normalizes joystick values on a range from [-1,1]
     def joy_normalize(self, val):
-        return (2 * (val - self.joy_min) / (self.joy_max - self.joy_min)) - 1
+        return 2 * ((2 * (val - self.joy_min) / (self.joy_max - self.joy_min)) - 1) - 1
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
         drive = 0.0
         steering = 0.0
-        movement_intent = MovementIntent()
         while True:
             try:
                 events = get_gamepad()
@@ -48,8 +47,9 @@ class GamepadNode(Node):
 
                     # left axis joystick vertical with deadzone
                     elif event.code == 'ABS_Y':
-                        drive = float(value)
+                        drive = - float(value)
 
+                movement_intent = MovementIntent()
                 movement_intent.steering = steering
                 movement_intent.drive = drive
                 # publish movement intent
