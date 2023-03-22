@@ -5,6 +5,7 @@ from inputs import UnpluggedError
 from global_msgs.msg import MovementIntent
 from threading import Thread
 from inputs import devices
+import hid
 
 
 # GamepadNode class
@@ -21,8 +22,12 @@ class GamepadNode(Node):
             "movement_intent",
             10
         )
+        self.get_logger().info(f"reading devices")
+        while True:
+            for device in hid.enumerate():
+                self.get_logger().info(f"0x{device['vendor_id']:04x}:0x{device['product_id']:04x} {device['product_string']}")
 
-        Thread(target=self.controller).start()
+        # Thread(target=self.controller).start()
 
     # normalizes joystick values on a range from [-1,1]
     def joy_normalize(self, val):
