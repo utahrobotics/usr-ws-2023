@@ -4,7 +4,7 @@ from rcl_interfaces.msg import ParameterDescriptor
 
 import Jetson.GPIO as GPIO
 from threading import Event, Thread
-from time import time
+from time import sleep
 
 from drive.drive_calculator import drive_steering
 
@@ -31,10 +31,10 @@ class Pin:
 
 
 class PWM:
-    def __init__(self, pin_number: int, frequency: int):
-        self._enabled = Event()
+    def __init__(self, pin_number: int, frequency: int, logger=None):
         self._duty_cycle = 0.0
         self._duty_cycle_changed = Event()
+        self.logger = logger
         self.thr = Thread(
             target=self._main_loop,
             args=(
@@ -58,31 +58,29 @@ class PWM:
         GPIO.setup(pin_number, GPIO.OUT)
 
         while True:
-            self._enabled.wait()
             ratio = self.duty_cycle
             self._duty_cycle_changed.clear()
+            
+            if ratio >= 0.9:
+                GPIO.output(pin_number, GPIO.HIGH)
+                self._duty_cycle_changed.wait()
+                continue
+            
+            if ratio <= 0.1:
+                GPIO.output(pin_number, GPIO.LOW)
+                self._duty_cycle_changed.wait()
+                continue
 
             on_duration = ratio / frequency
             off_duration = (1 - ratio) / frequency
 
-            while not self._duty_cycle_changed.is_set() and self._enabled.is_set():
-                GPIO.output(pin_number, GPIO.HIGH)
-                last_time = time()
-                while time() - last_time < on_duration:
-                    pass
+            while not self._duty_cycle_changed.is_set():
+                for _ in range(frequency // 10):
+                    GPIO.output(pin_number, GPIO.HIGH)
+                    sleep(on_duration)
 
-                GPIO.output(pin_number, GPIO.LOW)
-                last_time = time()
-                while time() - last_time < off_duration:
-                    pass
-
-            self._duty_cycle_changed.clear()
-
-    def enable(self):
-        self._enabled.set()
-
-    def disable(self):
-        self._enabled.clear()
+                    GPIO.output(pin_number, GPIO.LOW)
+                    sleep(off_duration)
 
 
 class Drive(Node):
@@ -192,13 +190,15 @@ class Drive(Node):
             self.get_parameter("right_duty_pin")
                 .get_parameter_value()
                 .integer_value,
-            frequency
+            frequency,
+            self.get_logger()
         )
         self.left_duty_pin = PWM(
             self.get_parameter("left_duty_pin")
                 .get_parameter_value()
                 .integer_value,
-            frequency
+            frequency,
+            self.get_logger()
         )
 
         self.right_dir_pin = Pin(
@@ -320,6 +320,9 @@ class Drive(Node):
             50
         )
 
+        self.right_duty_pin.set_duty_cycle(0.5)
+        self.left_duty_pin.set_duty_cycle(0.5)
+
     def movement_callback(self, msg):
         left_drive, right_drive = drive_steering(msg.drive, msg.steering)
         self.set_drive(left_drive, right_drive)
@@ -340,11 +343,12 @@ class Drive(Node):
         #     if not ready.is_set():
         #         return
 
-        right_disabled = abs(right_drive) < 0.01
-        left_disabled = abs(left_drive) < 0.01
+        self.left_duty_pin.set_duty_cycle(abs(left_drive))
+        self.right_duty_pin.set_duty_cycle(abs(right_drive))
 
-        if right_disabled and left_disabled:
+        if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
             self.enable_pin.set_low()
+            return
         else:
             self.enable_pin.set_high()
 
@@ -358,19 +362,7 @@ class Drive(Node):
         else:
             self.left_dir_pin.set_low()
 
-        if right_disabled:
-            self.right_duty_pin.disable()
-        else:
-            self.right_duty_pin.enable()
-            self.right_duty_pin.set_duty_cycle(abs(right_drive))
-
-        if left_disabled:
-            self.left_duty_pin.disable()
-        else:
-            self.left_duty_pin.enable()
-            self.left_duty_pin.set_duty_cycle(abs(left_drive))
         
-        # self.get_logger().info(f"{left_drive} {right_drive}")
 
 
 def main():
