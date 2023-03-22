@@ -1,10 +1,10 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.timer import Rate, Timer
 from rcl_interfaces.msg import ParameterDescriptor
 
 import Jetson.GPIO as GPIO
 from threading import Event, Thread
+from time import time
 
 from drive.drive_calculator import drive_steering
 
@@ -39,9 +39,7 @@ class PWM:
             target=self._main_loop,
             args=(
                 pin_number,
-                frequency,
-                self._enabled,
-                self.duty_cycle
+                frequency
             )
         )
         self.thr.start()
@@ -50,7 +48,6 @@ class PWM:
     def duty_cycle(self):
         return self._duty_cycle
 
-    @property.setter
     def set_duty_cycle(self, value):
         if value == self._duty_cycle:
             return
@@ -61,24 +58,25 @@ class PWM:
         GPIO.setup(pin_number, GPIO.OUT)
 
         while True:
-            GPIO.output(pin_number, GPIO.LOW)
             self._enabled.wait()
             ratio = self.duty_cycle
             self._duty_cycle_changed.clear()
 
-            onSleeper = Rate(Timer(timer_period_ns=1_000_000_000 * ratio / frequency))
-            offSleeper = Rate(Timer(timer_period_ns=1_000_000_000 * (1 - ratio) / frequency))
+            on_duration = ratio / frequency
+            off_duration = (1 - ratio) / frequency
 
-            while True:
-                if self._duty_cycle_changed.is_set():
-                    self._duty_cycle_changed.clear()
-                    break
-
+            while not self._duty_cycle_changed.is_set() and self._enabled.is_set():
                 GPIO.output(pin_number, GPIO.HIGH)
-                onSleeper.sleep()
+                last_time = time()
+                while time() - last_time < on_duration:
+                    pass
 
                 GPIO.output(pin_number, GPIO.LOW)
-                offSleeper.sleep()
+                last_time = time()
+                while time() - last_time < off_duration:
+                    pass
+
+            self._duty_cycle_changed.clear()
 
     def enable(self):
         self._enabled.set()
@@ -304,14 +302,14 @@ class Drive(Node):
         # Wait until all wheels are ready
         # This includes rewaiting for wheels
         # that unreadied while waiting for other wheels
-        while True:
-            for event in self.ready_events:
-                event.wait()
-            for event in self.ready_events:
-                if not event.is_set():
-                    break
-            else:
-                break
+        # while True:
+        #     for event in self.ready_events:
+        #         event.wait()
+        #     for event in self.ready_events:
+        #         if not event.is_set():
+        #             break
+        #     else:
+        #         break
 
         logger.info("All wheels ready!")
 
@@ -319,19 +317,12 @@ class Drive(Node):
             MovementIntent,
             'movement_intent',
             self.movement_callback,
-            10
+            50
         )
 
     def movement_callback(self, msg):
-        if msg.drive == 0:
-            self.enable_pin.set_low()
-            return
-
         left_drive, right_drive = drive_steering(msg.drive, msg.steering)
-
-        self.enable_pin.set_high()
-        self.set_drive(True, right_drive)
-        self.set_drive(False, left_drive)
+        self.set_drive(left_drive, right_drive)
 
     def set_drive(self, left_drive: float, right_drive: float):
         if not -1 <= left_drive <= 1:
@@ -345,9 +336,9 @@ class Drive(Node):
             )
             return
 
-        for ready in self.ready_events:
-            if not ready.is_set():
-                return
+        # for ready in self.ready_events:
+        #     if not ready.is_set():
+        #         return
 
         right_disabled = abs(right_drive) < 0.01
         left_disabled = abs(left_drive) < 0.01
@@ -371,13 +362,15 @@ class Drive(Node):
             self.right_duty_pin.disable()
         else:
             self.right_duty_pin.enable()
-            self.right_duty_pin.duty_cycle = abs(right_drive)
+            self.right_duty_pin.set_duty_cycle(abs(right_drive))
 
         if left_disabled:
             self.left_duty_pin.disable()
         else:
             self.left_duty_pin.enable()
-            self.left_duty_pin.duty_cycle = abs(left_drive)
+            self.left_duty_pin.set_duty_cycle(abs(left_drive))
+        
+        # self.get_logger().info(f"{left_drive} {right_drive}")
 
 
 def main():
