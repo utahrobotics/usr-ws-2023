@@ -1,26 +1,25 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer
-from rclpy.action.server import ServerGoalHandle
+# from rclpy.action import ActionServer
+# from rclpy.action.server import ServerGoalHandle
 from rcl_interfaces.msg import ParameterDescriptor
 
 from pyvesc import VESC
 from threading import Event, Thread
 from mining_arm.angle_sense import AngleSensor
+from multiprocessing import Value
 
-from global_msgs.action import SetArmAngle
+# from global_msgs.action import SetArmAngle
 from std_msgs.msg import Float32
 
 
 class MiningArm(Node):
-    ANGLE_READ_RATE = 20    # Hz
-
     def __init__(self):
         super().__init__("mining_arm")
 
         self.declare_parameter(
             "arm_motor_port",
-            "/dev/ttyACM0",
+            "/dev/ttyACM2",
             ParameterDescriptor(
                 description="The serial port that the arm motor"
                 " is connected to"
@@ -28,23 +27,51 @@ class MiningArm(Node):
         )
         self.declare_parameter(
             "drum_motor_port",
-            "/dev/ttyACM1",
+            "/dev/ttyACM0",
             ParameterDescriptor(
                 description="The serial port that the drum motor"
                 " is connected to"
             )
         )
+        self.declare_parameter(
+            "angle_read_rate",
+            50,
+            ParameterDescriptor(
+                description="The rate at which the angle sensor reads at in Hz"
+            )
+        )
+        self.declare_parameter(
+            "max_arm_angle",
+            18.0,
+            ParameterDescriptor(
+                description="The maximum angle that the arm can safely move to"
+            )
+        )
+        self.declare_parameter(
+            "min_arm_angle",
+            -37.0,
+            ParameterDescriptor(
+                description="The maximum angle that the arm can safely move to"
+            )
+        )
+        self.declare_parameter(
+            "angle_offset",
+            -147.0,
+            ParameterDescriptor(
+                description="The angle to offset the current angle by"
+            )
+        )
 
-        self.arm_motor = VESC(
-            serial_port=self.get_parameter("arm_motor_port")
-            .get_parameter_value()
-            .string_value
-        )
-        self.drum_motor = VESC(
-            serial_port=self.get_parameter("drum_motor_port")
-            .get_parameter_value()
-            .string_value
-        )
+        # self.arm_motor = VESC(
+        #     serial_port=self.get_parameter("arm_motor_port")
+        #     .get_parameter_value()
+        #     .string_value
+        # )
+        # self.drum_motor = VESC(
+        #     serial_port=self.get_parameter("drum_motor_port")
+        #     .get_parameter_value()
+        #     .string_value
+        # )
 
         self.arm_angle_pub = self.create_publisher(
             Float32,
@@ -57,10 +84,19 @@ class MiningArm(Node):
 
         def update_angle():
             angle_sensor = AngleSensor()
-            rate = self.create_rate(self.ANGLE_READ_RATE)
+            rate = self.create_rate(
+                self.get_parameter("angle_read_rate")
+                .get_parameter_value()
+                .integer_value
+            )
+            offset = self.create_rate(
+                self.get_parameter("angle_offset")
+                .get_parameter_value()
+                .double_value
+            )
 
             while self.updating_arm_angle:
-                self.arm_angle = angle_sensor.get_angle()
+                self.arm_angle = angle_sensor.get_angle() - offset
                 self.arm_angle_update_event.set()
                 self.arm_angle_update_event.clear()
                 self.arm_angle_pub.publish(Float32(data=self.arm_angle))
@@ -70,18 +106,18 @@ class MiningArm(Node):
             target=update_angle
         ).start()
 
-        self.setting_arm_angle = False
-        self.cancel_set_arm_angle = False
-        self.set_cancellation = Event()
+        # self.setting_arm_angle = False
+        # self.cancel_set_arm_angle = False
+        # self.set_cancellation = Event()
 
-        self.set_arm_angle_server = ActionServer(
-            self,
-            SetArmAngle,
-            "set_arm_angle",
-            self.set_arm_angle_callback,
-        )
+        # self.set_arm_angle_server = ActionServer(
+        #     self,
+        #     SetArmAngle,
+        #     "set_arm_angle",
+        #     self.set_arm_angle_callback,
+        # )
 
-        self.is_arm_vel_set = False
+        # self.is_arm_vel_set = False
         self.set_arm_velocity_sub = self.create_subscription(
             Float32,
             "set_arm_velocity",
@@ -96,58 +132,89 @@ class MiningArm(Node):
             10
         )
 
+        from ctypes import c_float
+        self.arm_velocity = Value(c_float, 0.0)
+
+        def send_arm_velocity(arm_vel):
+            max_angle = self.get_parameter("max_arm_angle") \
+                .get_parameter_value()  \
+                .integer_value
+            min_angle = self.get_parameter("min_arm_angle") \
+                .get_parameter_value()  \
+                .integer_value
+
+            while True:
+                vel = arm_vel.value
+                if vel > 0:
+                    if self.arm_angle >= max_angle:
+                        self.arm_motor.set_duty_cycle(0)
+                        continue
+                elif self.arm_angle < min_angle:
+                    self.arm_motor.set_duty_cycle(0)
+                    continue
+
+                self.get_logger().info(f"{vel}")
+                self.arm_motor.set_duty_cycle(vel)
+
+        Thread(
+            target=send_arm_velocity,
+            args=(
+                self.arm_velocity,
+            )
+        ).start()
+
     def close(self):
         self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
         self.drum_motor.stop_heartbeat()
 
-    def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
-        if self.setting_arm_angle:
-            self.cancel_set_arm_angle = True
-            self.set_cancellation.clear()
-            self.set_cancellation.wait()
+    # def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
+    #     if self.setting_arm_angle:
+    #         self.cancel_set_arm_angle = True
+    #         self.set_cancellation.clear()
+    #         self.set_cancellation.wait()
 
-        self.setting_arm_angle = True
-        self.cancel_set_arm_angle = False
-        self.is_arm_vel_set = False
+    #     self.setting_arm_angle = True
+    #     self.cancel_set_arm_angle = False
+    #     self.is_arm_vel_set = False
 
-        less_than = self.arm_angle < goal_handle.request.target_angle
+    #     less_than = self.arm_angle < goal_handle.request.target_angle
 
-        # TODO check values
-        self.arm_motor.set_duty_cycle(1 if less_than else -1)
+    #     # TODO check values
+    #     self.arm_motor.set_duty_cycle(1 if less_than else -1)
 
-        while True:
-            self.arm_angle_update_event.wait()
+    #     while True:
+    #         self.arm_angle_update_event.wait()
 
-            diff = goal_handle.request.target_angle - self.arm_angle
-            feedback = SetArmAngle.Feedback()
-            feedback.difference = diff
-            goal_handle.publish_feedback(feedback)
+    #         diff = goal_handle.request.target_angle - self.arm_angle
+    #         feedback = SetArmAngle.Feedback()
+    #         feedback.difference = diff
+    #         goal_handle.publish_feedback(feedback)
 
-            if goal_handle.is_cancel_requested() or \
-                    self.is_arm_vel_set or \
-                    self.cancel_set_arm_angle:
+    #         if goal_handle.is_cancel_requested() or \
+    #                 self.is_arm_vel_set or \
+    #                 self.cancel_set_arm_angle:
 
-                self.set_cancellation.set()
-                self.setting_arm_angle = False
+    #             self.set_cancellation.set()
+    #             self.setting_arm_angle = False
 
-                if goal_handle.is_cancel_requested():
-                    self.arm_motor.set_duty_cycle(0)
+    #             if goal_handle.is_cancel_requested():
+    #                 self.arm_motor.set_duty_cycle(0)
 
-                goal_handle.canceled()
-                return SetArmAngle.Result()
+    #             goal_handle.canceled()
+    #             return SetArmAngle.Result()
 
-            if less_than:
-                if diff >= 0:
-                    break
-            elif diff <= 0:
-                break
+    #         if less_than:
+    #             if diff >= 0:
+    #                 break
+    #         elif diff <= 0:
+    #             break
 
-        goal_handle.succeed()
-        self.arm_motor.set_duty_cycle(0)
-        self.setting_arm_angle = False
+    #     goal_handle.succeed()
+    #     self.arm_motor.set_duty_cycle(0)
+    #     self.setting_arm_angle = False
 
-        return SetArmAngle.Result()
+    #     return SetArmAngle.Result()
 
     def set_arm_velocity(self, msg):
         if not -1 <= msg.data <= 1:
@@ -155,8 +222,11 @@ class MiningArm(Node):
                 f"Received out of bounds arm velocity: {msg.data}"
             )
             return
-        self.is_arm_vel_set = True
-        self.arm_motor.set_duty_cycle(msg.data)
+
+        self.arm_velocity.value = msg.data
+        self.get_logger().info(f"{self.arm_velocity.value}")
+        # self.is_arm_vel_set = True
+        # self.arm_motor.set_duty_cycle(msg.data)
 
     def set_drum_velocity(self, msg):
         if not -1 <= msg.data <= 1:

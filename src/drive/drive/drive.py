@@ -4,7 +4,7 @@ from rcl_interfaces.msg import ParameterDescriptor
 
 import Jetson.GPIO as GPIO
 from threading import Event, Thread
-from time import sleep
+from time import time, sleep
 
 from drive.drive_calculator import drive_steering
 
@@ -248,49 +248,49 @@ class Drive(Node):
 
         def on_change(name: str, ready_event: Event, pin_num: int):
             if GPIO.input(pin_num) == GPIO.HIGH:
-                logger.info(f"{name} wheel is ready")
+                # logger.info(f"{name} wheel is ready")
                 ready_event.set()
             else:
-                logger.warn(f"{name} wheel unreadied!")
+                # logger.warn(f"{name} wheel unreadied!")
                 ready_event.clear()
-                self.enable_pin.set_low()
+                # self.enable_pin.set_low()
 
-        GPIO.add_event_detect(
-            front_left_ready_pin,
-            GPIO.BOTH,
-            callback=lambda pin_num: on_change(
-                "Front left",
-                front_left_is_ready,
-                pin_num
-            )
-        )
-        GPIO.add_event_detect(
-            front_right_ready_pin,
-            GPIO.BOTH,
-            callback=lambda pin_num: on_change(
-                "Front right",
-                front_right_is_ready,
-                pin_num
-            )
-        )
-        GPIO.add_event_detect(
-            back_left_ready_pin,
-            GPIO.BOTH,
-            callback=lambda pin_num: on_change(
-                "Back left",
-                back_left_is_ready,
-                pin_num
-            )
-        )
-        GPIO.add_event_detect(
-            back_right_ready_pin,
-            GPIO.BOTH,
-            callback=lambda pin_num: on_change(
-                "Back right",
-                back_right_is_ready,
-                pin_num
-            )
-        )
+        # GPIO.add_event_detect(
+        #     front_left_ready_pin,
+        #     GPIO.BOTH,
+        #     callback=lambda pin_num: on_change(
+        #         "Front left",
+        #         front_left_is_ready,
+        #         pin_num
+        #     )
+        # )
+        # GPIO.add_event_detect(
+        #     front_right_ready_pin,
+        #     GPIO.BOTH,
+        #     callback=lambda pin_num: on_change(
+        #         "Front right",
+        #         front_right_is_ready,
+        #         pin_num
+        #     )
+        # )
+        # GPIO.add_event_detect(
+        #     back_left_ready_pin,
+        #     GPIO.BOTH,
+        #     callback=lambda pin_num: on_change(
+        #         "Back left",
+        #         back_left_is_ready,
+        #         pin_num
+        #     )
+        # )
+        # GPIO.add_event_detect(
+        #     back_right_ready_pin,
+        #     GPIO.BOTH,
+        #     callback=lambda pin_num: on_change(
+        #         "Back right",
+        #         back_right_is_ready,
+        #         pin_num
+        #     )
+        # )
 
         self.ready_events = [
             front_left_is_ready,
@@ -343,13 +343,16 @@ class Drive(Node):
         #     if not ready.is_set():
         #         return
 
+        # self.get_logger().info(f"{left_drive} {right_drive}")
         self.left_duty_pin.set_duty_cycle(abs(left_drive))
         self.right_duty_pin.set_duty_cycle(abs(right_drive))
 
         if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
+            # self.get_logger().info("Off")
             self.enable_pin.set_low()
             return
         else:
+            # self.get_logger().info("On")
             self.enable_pin.set_high()
 
         if right_drive < 0:
@@ -361,8 +364,6 @@ class Drive(Node):
             self.left_dir_pin.set_high()
         else:
             self.left_dir_pin.set_low()
-
-        
 
 
 def main():
