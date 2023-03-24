@@ -18,7 +18,7 @@ class Drive(Node):
 
         self.declare_parameter(
             "controller_port",
-            "/dev/ttyUSB0",
+            "/dev/ttyACM0",
             ParameterDescriptor(
                 description="The port of the motor controller"
             )
@@ -27,8 +27,15 @@ class Drive(Node):
         self.controller = Serial(
             self.get_parameter("controller_port")
                 .get_parameter_value()
-                .string_value
-            )
+                .string_value,
+            115200
+        )
+
+        # self.controller.write("printReadies()\r".encode())
+        # self.controller.flush()
+        # for _ in range(7):
+        #     self.get_logger().info(self.controller.readline().decode())
+        # self.controller.read(4)
 
         self.movement_listener = self.create_subscription(
             MovementIntent,

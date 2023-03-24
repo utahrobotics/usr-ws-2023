@@ -13,7 +13,7 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install ros-foxy-ros-base python3-argcomplete -y --no-install-recommends
 
 # Install GPIO and VESC stuff, and rosdep
-RUN pip install Jetson.GPIO pyvesc rosdep
+RUN pip install Jetson.GPIO pyvesc rosdep pyserial
 # Install colcon and build essentials
 RUN apt-get install python3-colcon-common-extensions build-essential -y --no-install-recommends
 # Update rosdep
