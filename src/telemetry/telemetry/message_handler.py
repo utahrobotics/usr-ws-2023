@@ -42,7 +42,7 @@ class RemoteMovementIntent(AbstractMessage):
 
     HEADER_BYTE = 2
 
-    def __init__(self, drive: float, steering: float) -> None:
+    def __init__(self, drive: float, steering: float):
         self.drive = drive
         self.steering = steering
 
@@ -52,12 +52,12 @@ class RemoteMovementIntent(AbstractMessage):
             raise IncompleteMessageException()
 
         if data[0] == 255:
-            drive = 1
+            drive = 1.0
         else:
             drive = (data[0] - 127) / 127
 
         if data[1] == 255:
-            steering = 1
+            steering = 1.0
         else:
             steering = (data[1] - 127) / 127
 
@@ -66,8 +66,72 @@ class RemoteMovementIntent(AbstractMessage):
 
     def to_bytes(self) -> bytes:
         return bytes([
-            255 if self.drive == 1 else (self.drive + 1) * 127,
-            255 if self.drive == 1 else (self.steering + 1) * 127
+            255 if self.drive == 1 else int((self.drive + 1) * 127),
+            255 if self.steering == 1 else int((self.steering + 1) * 127)
+        ])
+
+
+class SetArmVelocity(AbstractMessage):
+    """
+    A remote request to set the velocity of the arm.
+
+    The first byte represents the velocity (byte value of 0 represents -1.0,
+    and value of 255 represents 1.0 drive)
+    """
+
+    HEADER_BYTE = 3
+
+    def __init__(self, velocity: float):
+        self.velocity = velocity
+
+    @classmethod
+    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
+        if len(data) < 1:
+            raise IncompleteMessageException()
+
+        if data[0] == 255:
+            vel = 1.0
+        else:
+            vel = (data[0] - 127) / 127
+
+        del data[0]
+        return SetArmVelocity(vel)
+
+    def to_bytes(self) -> bytes:
+        return bytes([
+            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
+        ])
+
+
+class SetDrumVelocity(AbstractMessage):
+    """
+    A remote request to set the velocity of the drum.
+
+    The first byte represents the velocity (byte value of 0 represents -1.0,
+    and value of 255 represents 1.0 drive)
+    """
+
+    HEADER_BYTE = 4
+
+    def __init__(self, velocity: float):
+        self.velocity = velocity
+
+    @classmethod
+    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
+        if len(data) < 1:
+            raise IncompleteMessageException()
+
+        if data[0] == 255:
+            vel = 1.0
+        else:
+            vel = (data[0] - 127) / 127
+
+        del data[0]
+        return SetDrumVelocity(vel)
+
+    def to_bytes(self) -> bytes:
+        return bytes([
+            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
         ])
 
 
@@ -90,7 +154,7 @@ class BodyOnlyMessage(AbstractMessage, ABC):
     the size of the body
     """
 
-    def __init__(self, body: bytes) -> None:
+    def __init__(self, body: bytes):
         self.body = body
 
     @classmethod
@@ -142,7 +206,9 @@ class HardPing(SoftPing):
 MESSAGE_TYPES = (
     SoftPing,
     HardPing,
-    RemoteMovementIntent
+    RemoteMovementIntent,
+    SetArmVelocity,
+    SetDrumVelocity
 )
 
 

@@ -1,10 +1,8 @@
 import rclpy
 from rclpy.node import Node
-from inputs import get_gamepad
-from inputs import UnpluggedError
 from global_msgs.msg import MovementIntent
+from std_msgs.msg import Float32
 from threading import Thread
-from inputs import devices
 import hid
 
 
@@ -12,22 +10,35 @@ import hid
 # Broadcasts gamepad joystick information, compatible with
 class GamepadNode(Node):
     joy_max = 255  # maximum value for joystick
-    joy_min = -255  # minimum value for joystick
+    joy_min = 0  # minimum value for joystick
     deadzone = 0.1  # deadzone value, can be changed
+    vendor_id = 0x054C
+    product_id = 0x05C4
 
     def __init__(self):
         super().__init__("gamepad_node")
-        self.publisher = self.create_publisher(
+        self.move_publisher = self.create_publisher(
             MovementIntent,
             "movement_intent",
             10
         )
-        self.get_logger().info(f"reading devices")
-        while True:
-            for device in hid.enumerate():
-                self.get_logger().info(f"0x{device['vendor_id']:04x}:0x{device['product_id']:04x} {device['product_string']}")
+        self.arm_publisher = self.create_publisher(
+            Float32,
+            "set_arm_velocity",
+            10
+        )
+        self.drum_publisher = self.create_publisher(
+            Float32,
+            "set_drum_velocity",
+            10
+        )
 
-        # Thread(target=self.controller).start()
+        self.gamepad = hid.device()
+        self.gamepad.open(self.vendor_id, self.product_id)
+        self.gamepad.set_nonblocking(True)
+        # self.gamepad = hid.Device(vid=self.vendor_id, pid=self.product_id)
+        Thread(target=self.controller).start()
+        # self.get_logger().info("Success")
 
     # normalizes joystick values on a range from [-1,1]
     def joy_normalize(self, val):
@@ -35,32 +46,36 @@ class GamepadNode(Node):
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
-        drive = 0.0
-        steering = 0.0
+        self.get_logger().info("Local Gamepad started")
         while True:
-            try:
-                events = get_gamepad()
-                for event in events:
-                    value = self.joy_normalize(event.state)
-
-                    if abs(value) <= self.deadzone:
-                        value = 0
-
-                    # left axis joystick horizontal with deadzone
-                    if event.code == 'ABS_X':
-                        steering = float(value)
-
-                    # left axis joystick vertical with deadzone
-                    elif event.code == 'ABS_Y':
-                        drive = - float(value)
-
-                movement_intent = MovementIntent()
-                movement_intent.steering = steering
-                movement_intent.drive = drive
-                # publish movement intent
-                self.publisher.publish(movement_intent)
-            except UnpluggedError:
+            report = self.gamepad.read(64)
+            if len(report) == 0:
                 continue
+            # for x axis, 0 is left, 255 is right, 128 is middle
+            # for y axis, 0 is up, 255 is down, 128 is middle
+            # left stick x, left stick y, right stick y
+            joysticks = [report[1], report[2], report[4]]
+            # apply deadzone
+            for i in range(len(joysticks)):
+                if abs(joysticks[i] - 128) <= 128 * self.deadzone:
+                    joysticks[i] = 128
+            # get bumpers, 0 if not pressed, not 0 if pressed
+            l_bumper = report[6] & 0b1
+            r_bumper = report[6] & 0b10
+            # publish movement_intent
+            movement_intent = MovementIntent()
+            movement_intent.steering = joysticks[0] / 128 - 1.0
+            movement_intent.drive = - joysticks[1] / 128 + 1.0
+            self.move_publisher.publish(movement_intent)
+            # publish arm velocity
+            self.arm_publisher.publish(Float32(data=-joysticks[2] / 128 + 1.0))
+            # publish drum velocity
+            if r_bumper == l_bumper:
+                self.drum_publisher.publish(Float32(data=0.0))
+            elif r_bumper > 0:
+                self.drum_publisher.publish(Float32(data=1.0))
+            else:
+                self.drum_publisher.publish(Float32(data=-1.0))
 
 
 def main():
