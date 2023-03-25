@@ -62,15 +62,14 @@ class Drive(Node):
 
         # self.get_logger().info(f'setSpeed({left_drive},{right_drive})')
 
-        self.controller.write(f'setSpeed({left_drive},{right_drive})\r'.encode())
-
         if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
             self.controller.write(b'setEnable(0)\r')
-            return
         else:
-            self.controller.write(b'setEnable(1)\r')
-
-        self.controller.write(f'setDirection({int(left_drive > 0)},{int(right_drive > 0)})\r'.encode())
+            # set(enable, left_dir, right_dir, left_speed, right_speed)
+            self.controller.write(
+                f"set(1,{int(left_drive > 0)},{int(right_drive > 0)},"
+                f"{left_drive},{right_drive})"
+            )
 
 
 def main():
