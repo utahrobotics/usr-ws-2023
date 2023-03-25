@@ -139,7 +139,7 @@ class Client(Node):
             while True:  # Processing loop
                 try:
                     tmp = await reader.read(self.BUFFER_SIZE)
-                except BrokenPipeError:
+                except BrokenPipeError or ConnectionResetError:
                     break
 
                 logger.debug(f"Received {tmp}")
