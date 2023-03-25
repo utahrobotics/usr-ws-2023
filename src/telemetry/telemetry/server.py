@@ -12,9 +12,10 @@ from rcl_interfaces.msg import ParameterDescriptor
 from telemetry.message_handler import parse_message, message_to_bytes
 from telemetry.message_handler import SoftPing, HardPing
 from telemetry.message_handler import IncompleteMessageException
+from telemetry.message_handler import SetDrumVelocity, SetArmVelocity
 from telemetry.message_handler import RemoteMovementIntent
 
-from std_msgs.msg import Empty
+from std_msgs.msg import Empty, Float32
 from global_msgs.msg import MovementIntent
 
 
@@ -45,6 +46,20 @@ class Server(Node):
             MovementIntent,
             'movement_intent',
             self.on_movement_intent_msg,
+            10
+        )
+
+        self.arm_vel_sub = self.create_subscription(
+            Float32,
+            'set_arm_velocity',
+            self.on_arm_vel_msg,
+            10
+        )
+
+        self.drum_vel_sub = self.create_subscription(
+            Float32,
+            'set_drum_velocity',
+            self.on_drum_vel_msg,
             10
         )
 
@@ -94,6 +109,34 @@ class Server(Node):
                 RemoteMovementIntent(
                     msg.drive,
                     msg.steering
+                )
+            )
+        )
+
+    def on_arm_vel_msg(self, msg):
+        current_time = time()
+        if current_time - self.last_movement_msg_time <= \
+                self.MOVEMENT_INTENT_DELAY:
+            return
+        self.last_movement_msg_time = current_time
+        self.send_data(
+            message_to_bytes(
+                SetArmVelocity(
+                    msg.data,
+                )
+            )
+        )
+
+    def on_drum_vel_msg(self, msg):
+        current_time = time()
+        if current_time - self.last_movement_msg_time <= \
+                self.MOVEMENT_INTENT_DELAY:
+            return
+        self.last_movement_msg_time = current_time
+        self.send_data(
+            message_to_bytes(
+                SetDrumVelocity(
+                    msg.data,
                 )
             )
         )

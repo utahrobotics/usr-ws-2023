@@ -11,9 +11,10 @@ from rcl_interfaces.msg import ParameterDescriptor
 from telemetry.message_handler import parse_message, SoftPing, HardPing
 from telemetry.message_handler import message_to_bytes
 from telemetry.message_handler import IncompleteMessageException
+from telemetry.message_handler import SetDrumVelocity, SetArmVelocity
 from telemetry.message_handler import RemoteMovementIntent
 
-from std_msgs.msg import Empty
+from std_msgs.msg import Empty, Float32
 from global_msgs.msg import MovementIntent
 
 
@@ -79,6 +80,16 @@ class Client(Node):
         movement_intent_pub = self.create_publisher(
             MovementIntent,
             'movement_intent',
+            10
+        )
+        arm_vel_pub = self.create_publisher(
+            Float32,
+            'set_arm_velocity',
+            10
+        )
+        drum_vel_pub = self.create_publisher(
+            Float32,
+            'set_drum_velocity',
             10
         )
         logger = self.get_logger()
@@ -168,6 +179,12 @@ class Client(Node):
                     msg.drive = result.drive
                     msg.steering = result.steering
                     movement_intent_pub.publish(msg)
+
+                elif isinstance(result, SetArmVelocity):
+                    arm_vel_pub.publish(Float32(data=result.velocity))
+
+                elif isinstance(result, SetDrumVelocity):
+                    drum_vel_pub.publish(Float32(data=result.velocity))
 
             with self.can_write.get_lock():
                 self.can_write.value = False

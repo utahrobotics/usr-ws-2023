@@ -42,7 +42,7 @@ class RemoteMovementIntent(AbstractMessage):
 
     HEADER_BYTE = 2
 
-    def __init__(self, drive: float, steering: float) -> None:
+    def __init__(self, drive: float, steering: float):
         self.drive = drive
         self.steering = steering
 
@@ -71,6 +71,70 @@ class RemoteMovementIntent(AbstractMessage):
         ])
 
 
+class SetArmVelocity(AbstractMessage):
+    """
+    A remote request to set the velocity of the arm.
+
+    The first byte represents the velocity (byte value of 0 represents -1.0,
+    and value of 255 represents 1.0 drive)
+    """
+
+    HEADER_BYTE = 3
+
+    def __init__(self, velocity: float):
+        self.velocity = velocity
+
+    @classmethod
+    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
+        if len(data) < 1:
+            raise IncompleteMessageException()
+
+        if data[0] == 255:
+            vel = 1.0
+        else:
+            vel = (data[0] - 127) / 127
+
+        del data[0:2]
+        return SetArmVelocity(vel)
+
+    def to_bytes(self) -> bytes:
+        return bytes([
+            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
+        ])
+
+
+class SetDrumVelocity(AbstractMessage):
+    """
+    A remote request to set the velocity of the drum.
+
+    The first byte represents the velocity (byte value of 0 represents -1.0,
+    and value of 255 represents 1.0 drive)
+    """
+
+    HEADER_BYTE = 4
+
+    def __init__(self, velocity: float):
+        self.velocity = velocity
+
+    @classmethod
+    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
+        if len(data) < 1:
+            raise IncompleteMessageException()
+
+        if data[0] == 255:
+            vel = 1.0
+        else:
+            vel = (data[0] - 127) / 127
+
+        del data[0:2]
+        return SetArmVelocity(vel)
+
+    def to_bytes(self) -> bytes:
+        return bytes([
+            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
+        ])
+
+
 class NoBodyMessage(AbstractMessage, ABC):
     """Represents a message that has no body."""
 
@@ -90,7 +154,7 @@ class BodyOnlyMessage(AbstractMessage, ABC):
     the size of the body
     """
 
-    def __init__(self, body: bytes) -> None:
+    def __init__(self, body: bytes):
         self.body = body
 
     @classmethod
@@ -142,7 +206,9 @@ class HardPing(SoftPing):
 MESSAGE_TYPES = (
     SoftPing,
     HardPing,
-    RemoteMovementIntent
+    RemoteMovementIntent,
+    SetArmVelocity,
+    SetDrumVelocity
 )
 
 

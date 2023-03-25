@@ -67,7 +67,7 @@ class GamepadNode(Node):
             movement_intent.drive = - joysticks[1] / 128 + 1.0
             self.move_publisher.publish(movement_intent)
             # publish arm velocity
-            self.arm_publisher.publish(Float32(data=joysticks[2] / 255))
+            self.arm_publisher.publish(Float32(data=-joysticks[2] / 128 + 1.0))
             # publish drum velocity
             if r_bumper == l_bumper:
                 self.drum_publisher.publish(Float32(data=0.0))
