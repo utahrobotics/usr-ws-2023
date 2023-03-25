@@ -46,6 +46,7 @@ class GamepadNode(Node):
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
+        self.get_logger().info("Local Gamepad started")
         while True:
             report = self.gamepad.read(64)
             if len(report) == 0:

@@ -78,8 +78,11 @@ class Server(Node):
         )
 
         self.last_movement_msg_time = 0
+        self.last_movement = b''
         self.last_arm_vel_time = 0
+        self.last_arm_vel = b''
         self.last_drum_vel_time = 0
+        self.last_drum_vel = b''
 
         def main_loop(*args):
             asyncio.run(self.main_loop(*args))
@@ -105,43 +108,56 @@ class Server(Node):
         if current_time - self.last_movement_msg_time <= \
                 self.RATE_LIMIT_DELAY:
             return
-        self.last_movement_msg_time = current_time
-        self.send_data(
-            message_to_bytes(
-                RemoteMovementIntent(
-                    msg.drive,
-                    msg.steering
-                )
+        
+        msg = message_to_bytes(
+            RemoteMovementIntent(
+                msg.drive,
+                msg.steering
             )
         )
+
+        if msg == self.last_movement:
+            return
+
+        self.last_movement = msg
+        self.last_movement_msg_time = current_time
+        self.send_data(msg)
 
     def on_arm_vel_msg(self, msg):
         current_time = time()
         if current_time - self.last_arm_vel_time <= \
                 self.RATE_LIMIT_DELAY:
             return
-        self.last_arm_vel_time = current_time
-        self.send_data(
-            message_to_bytes(
-                SetArmVelocity(
-                    msg.data,
-                )
+
+        msg = message_to_bytes(
+            SetArmVelocity(
+                msg.data,
             )
         )
+
+        if msg == self.last_arm_vel:
+            return
+        self.last_arm_vel = msg
+        self.last_arm_vel_time = current_time
+        self.send_data(msg)
 
     def on_drum_vel_msg(self, msg):
         current_time = time()
         if current_time - self.last_drum_vel_time <= \
                 self.RATE_LIMIT_DELAY:
             return
-        self.last_drum_vel_time = current_time
-        self.send_data(
-            message_to_bytes(
-                SetDrumVelocity(
-                    msg.data,
-                )
+
+        msg = message_to_bytes(
+            SetDrumVelocity(
+                msg.data,
             )
         )
+
+        if msg == self.last_drum_vel:
+            return
+        self.last_drum_vel = msg
+        self.last_drum_vel_time = current_time
+        self.send_data(msg)
 
     def on_soft_ping_msg(self, _msg):
         self.send_data(
