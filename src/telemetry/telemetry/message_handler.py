@@ -127,7 +127,7 @@ class SetDrumVelocity(AbstractMessage):
             vel = (data[0] - 127) / 127
 
         del data[0:2]
-        return SetArmVelocity(vel)
+        return SetDrumVelocity(vel)
 
     def to_bytes(self) -> bytes:
         return bytes([

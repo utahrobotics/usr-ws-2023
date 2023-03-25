@@ -27,7 +27,7 @@ class Server(Node):
     # How long to wait to relisten after a connection failure
     RELISTEN_DELAY = 2
 
-    MOVEMENT_INTENT_DELAY = 0.1
+    RATE_LIMIT_DELAY = 0.1
 
     def __init__(self):
         super().__init__("telemetry_server")
@@ -78,6 +78,8 @@ class Server(Node):
         )
 
         self.last_movement_msg_time = 0
+        self.last_arm_vel_time = 0
+        self.last_drum_vel_time = 0
 
         def main_loop(*args):
             asyncio.run(self.main_loop(*args))
@@ -101,7 +103,7 @@ class Server(Node):
     def on_movement_intent_msg(self, msg):
         current_time = time()
         if current_time - self.last_movement_msg_time <= \
-                self.MOVEMENT_INTENT_DELAY:
+                self.RATE_LIMIT_DELAY:
             return
         self.last_movement_msg_time = current_time
         self.send_data(
@@ -115,10 +117,10 @@ class Server(Node):
 
     def on_arm_vel_msg(self, msg):
         current_time = time()
-        if current_time - self.last_movement_msg_time <= \
-                self.MOVEMENT_INTENT_DELAY:
+        if current_time - self.last_arm_vel_time <= \
+                self.RATE_LIMIT_DELAY:
             return
-        self.last_movement_msg_time = current_time
+        self.last_arm_vel_time = current_time
         self.send_data(
             message_to_bytes(
                 SetArmVelocity(
@@ -129,10 +131,10 @@ class Server(Node):
 
     def on_drum_vel_msg(self, msg):
         current_time = time()
-        if current_time - self.last_movement_msg_time <= \
-                self.MOVEMENT_INTENT_DELAY:
+        if current_time - self.last_drum_vel_time <= \
+                self.RATE_LIMIT_DELAY:
             return
-        self.last_movement_msg_time = current_time
+        self.last_drum_vel_time = current_time
         self.send_data(
             message_to_bytes(
                 SetDrumVelocity(
