@@ -32,8 +32,13 @@ class GamepadNode(Node):
             "set_drum_velocity",
             10
         )
-        self.gamepad = hid.Device(vid=self.vendor_id, pid=self.product_id)
+
+        self.gamepad = hid.device()
+        self.gamepad.open(self.vendor_id, self.product_id)
+        self.gamepad.set_nonblocking(True)
+        # self.gamepad = hid.Device(vid=self.vendor_id, pid=self.product_id)
         Thread(target=self.controller).start()
+        # self.get_logger().info("Success")
 
     # normalizes joystick values on a range from [-1,1]
     def joy_normalize(self, val):
@@ -41,60 +46,35 @@ class GamepadNode(Node):
 
     # publish joystick values to "movement_intent" topic
     def controller(self):
-        drive = 0.0
-        steering = 0.0
         while True:
             report = self.gamepad.read(64)
+            if len(report) == 0:
+                continue
             # for x axis, 0 is left, 255 is right, 128 is middle
             # for y axis, 0 is up, 255 is down, 128 is middle
             # left stick x, left stick y, right stick y
             joysticks = [report[1], report[2], report[4]]
             # apply deadzone
             for i in range(len(joysticks)):
-                if abs(joysticks[i] - 128) <= self.deadzone:
-                    joysticks[i] = 0
+                if abs(joysticks[i] - 128) <= 128 * self.deadzone:
+                    joysticks[i] = 128
             # get bumpers, 0 if not pressed, not 0 if pressed
             l_bumper = report[6] & 0b1
             r_bumper = report[6] & 0b10
             # publish movement_intent
             movement_intent = MovementIntent()
-            movement_intent.steering = joysticks[0]
-            movement_intent.drive = joysticks[1]
+            movement_intent.steering = joysticks[0] / 128 - 1.0
+            movement_intent.drive = - joysticks[1] / 128 + 1.0
             self.move_publisher.publish(movement_intent)
             # publish arm velocity
-            self.arm_publisher.publish(joysticks[2])
+            self.arm_publisher.publish(Float32(data=joysticks[2] / 255))
             # publish drum velocity
             if r_bumper == l_bumper:
-                self.drum_publisher.publish(0)
+                self.drum_publisher.publish(Float32(data=0.0))
             elif r_bumper > 0:
-                self.drum_publisher.publish(1)
+                self.drum_publisher.publish(Float32(data=1.0))
             else:
-                self.drum_publisher.publish(-1)
-            """ OLD VERSION, uses inputs library
-            try:
-                events = get_gamepad()
-                for event in events:
-                    value = self.joy_normalize(event.state)
-
-                    if abs(value) <= self.deadzone:
-                        value = 0
-
-                    # left axis joystick horizontal with deadzone
-                    if event.code == 'ABS_X':
-                        steering = float(value)
-
-                    # left axis joystick vertical with deadzone
-                    elif event.code == 'ABS_Y':
-                        drive = - float(value)
-
-                movement_intent = MovementIntent()
-                movement_intent.steering = steering
-                movement_intent.drive = drive
-                # publish movement intent
-                self.move_publisher.publish(movement_intent)
-            except UnpluggedError:
-                continue
-            """
+                self.drum_publisher.publish(Float32(data=-1.0))
 
 
 def main():
