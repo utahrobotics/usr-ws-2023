@@ -107,11 +107,13 @@ class Server(Node):
         while True:
             sleep(self.RATE_LIMIT_DELAY)
             self.send_data(
-                RemoteControl(
-                    self.current_drive,
-                    self.current_steer,
-                    self.current_arm_vel,
-                    self.current_drum_vel
+                message_to_bytes(
+                    RemoteControl(
+                        self.current_drive,
+                        self.current_steer,
+                        self.current_arm_vel,
+                        self.current_drum_vel
+                    )
                 )
             )
 
