@@ -6,6 +6,8 @@ services:
     tty: true
     pull_policy: always
     working_dir: /usr-ws-2023
+    ports:
+      - 10000:10000
     volumes:
       - type: bind
         source: ../
