@@ -13,7 +13,7 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install ros-foxy-ros-base python3-argcomplete -y --no-install-recommends
 
 # Install hid dependencies
-RUN apt-get install python-dev libusb-1.0-0-dev libudev-dev
+RUN apt-get install python-dev libusb-1.0-0-dev libudev-dev -y --no-install-recommends
 # Upgrade setuptools, then install GPIO and VESC stuff, and rosdep
 RUN pip install --upgrade setuptools && \
     pip install Jetson.GPIO pyvesc rosdep pyserial hidapi
