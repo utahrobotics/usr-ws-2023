@@ -5,13 +5,13 @@ on:
   push:
     branches: [ "main" ]
     paths: 
-      - 'deployment_utils/lunabase/*.dockerfile'
-      - 'deployment_utils/lunabase/*.sh'
+      - 'deployment_utils/*.dockerfile'
+      - 'deployment_utils/*.sh'
   pull_request:
     branches: [ "main" ]
     paths: 
-      - 'deployment_utils/lunabase/*.dockerfile'
-      - 'deployment_utils/lunabase/*.sh'
+      - 'deployment_utils/*.dockerfile'
+      - 'deployment_utils/*.sh'
 
 jobs:
   build_amd64:
