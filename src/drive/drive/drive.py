@@ -18,7 +18,7 @@ class Drive(Node):
 
         self.declare_parameter(
             "controller_port",
-            "/dev/ttyACM0",
+            "/dev/ttyACM2",
             ParameterDescriptor(
                 description="The port of the motor controller"
             )
@@ -60,17 +60,17 @@ class Drive(Node):
             )
             return
 
-        # self.get_logger().info(f"{left_drive} {right_drive}")
+        # self.get_logger().info(f'setSpeed({left_drive},{right_drive})')
 
-        self.controller.write(f'setSpeed({left_drive},{right_drive})\n'.encode())
+        self.controller.write(f'setSpeed({left_drive},{right_drive})\r'.encode())
 
         if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
-            self.controller.write(b'setEnable(False)\n')
+            self.controller.write(b'setEnable(0)\r')
             return
         else:
-            self.controller.write(b'setEnable(True)\n')
+            self.controller.write(b'setEnable(1)\r')
 
-        self.controller.write(f'setDirection({left_drive < 0},{right_drive < 0})\n'.encode())
+        self.controller.write(f'setDirection({int(left_drive > 0)},{int(right_drive > 0)})\r'.encode())
 
 
 def main():

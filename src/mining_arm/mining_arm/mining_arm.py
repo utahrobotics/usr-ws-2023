@@ -67,17 +67,12 @@ class MiningArm(Node):
             .get_parameter_value()
             .string_value
         )
-        self.drum_motor = VESC(
-            serial_port=self.get_parameter("drum_motor_port")
-            .get_parameter_value()
-            .string_value
-        )
+        # self.drum_motor = VESC(
+        #     serial_port=self.get_parameter("drum_motor_port")
+        #     .get_parameter_value()
+        #     .string_value
+        # )
 
-        self.arm_angle_pub = self.create_publisher(
-            Float32,
-            "arm_angle",
-            10
-        )
         self.arm_angle = 0
         self.arm_angle_update_event = Event()
         self.updating_arm_angle = True
@@ -92,12 +87,17 @@ class MiningArm(Node):
             offset = self.get_parameter("angle_offset") \
                 .get_parameter_value()  \
                 .double_value
+            arm_angle_pub = self.create_publisher(
+                Float32,
+                "arm_angle",
+                10
+            )
 
             while self.updating_arm_angle:
                 self.arm_angle = angle_sensor.get_angle() + offset
                 self.arm_angle_update_event.set()
                 self.arm_angle_update_event.clear()
-                self.arm_angle_pub.publish(Float32(data=self.arm_angle))
+                arm_angle_pub.publish(Float32(data=self.arm_angle))
                 rate.sleep()
 
         Thread(
@@ -163,7 +163,7 @@ class MiningArm(Node):
     def close(self):
         # self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
-        self.drum_motor.stop_heartbeat()
+        # self.drum_motor.stop_heartbeat()
 
     # def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
     #     if self.setting_arm_angle:
