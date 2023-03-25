@@ -66,8 +66,8 @@ class RemoteMovementIntent(AbstractMessage):
 
     def to_bytes(self) -> bytes:
         return bytes([
-            255 if self.drive == 1 else (self.drive + 1) * 127,
-            255 if self.drive == 1 else (self.steering + 1) * 127
+            255 if self.drive == 1 else int((self.drive + 1) * 127),
+            255 if self.drive == 1 else int((self.steering + 1) * 127)
         ])
 
 
