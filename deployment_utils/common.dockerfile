@@ -37,52 +37,8 @@ RUN chmod +x /root/findusbdev.sh
 RUN ["/bin/bash", "-c", "cat /bashrc_append >> /root/.bashrc && rm /bashrc_append"]
 
 FROM base as lunabase
-ARG TNVC_URL
 
-# Install shared utils
-RUN apt-get install -y --no-install-recommends \
-        apt-utils \
-        ca-certificates \
-        locales \
-        net-tools \
-        sudo \
-        supervisor \
-        wget \
-        openssh-server
-
-# Install XFCE and terminal
-RUN apt-get install -y --no-install-recommends \
-        dbus-x11 \
-        libexo-1-0 \
-        x11-apps \
-        x11-xserver-utils \
-        xauth \
-        xfce4 \
-        xfce4-terminal \
-        xterm
-
-ENV VNC_PORT=5901 \
-    VNC_RESOLUTION=1024x640 \
-    DISPLAY=:1 \
-    TERM=xterm \
-    DEBIAN_FRONTEND=noninteractive \
-    HOME=/root \
-    PATH=/opt/TurboVNC/bin:$PATH \
-    TVNC_WM=xfce4-session \
-    PASSWORD=password
-
-EXPOSE $VNC_PORT
-
-# Install TurboVNC
-RUN wget -q -O tvnc_download.deb $TNVC_URL && \
-    dpkg -i tvnc_download.deb && \
-    rm -f tvnc_download.deb
-
-# Configure X server
-RUN touch ~/.Xauthority && \
-    mkdir ~/.vnc
-
-# # Install rviz2
+# Install rviz2
 RUN apt-get install -y --no-install-recommends \
     ros-foxy-rviz2 \
     ros-foxy-rviz-visual-tools

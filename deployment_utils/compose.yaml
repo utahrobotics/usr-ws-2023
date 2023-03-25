@@ -5,11 +5,10 @@ services:
     privileged: true
     tty: true
     pull_policy: always
-    ports:
-      - "5901:5901"
-      - "10000:10000"
     working_dir: /usr-ws-2023
     volumes:
       - type: bind
         source: ../
         target: /usr-ws-2023
+    environment:
+      DISPLAY: "unix:0"
