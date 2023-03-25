@@ -19,7 +19,7 @@ class MiningArm(Node):
 
         self.declare_parameter(
             "arm_motor_port",
-            "/dev/ttyACM2",
+            "/dev/ttyACM1",
             ParameterDescriptor(
                 description="The serial port that the arm motor"
                 " is connected to"
@@ -62,16 +62,16 @@ class MiningArm(Node):
             )
         )
 
-        # self.arm_motor = VESC(
-        #     serial_port=self.get_parameter("arm_motor_port")
-        #     .get_parameter_value()
-        #     .string_value
-        # )
-        # self.drum_motor = VESC(
-        #     serial_port=self.get_parameter("drum_motor_port")
-        #     .get_parameter_value()
-        #     .string_value
-        # )
+        self.arm_motor = VESC(
+            serial_port=self.get_parameter("arm_motor_port")
+            .get_parameter_value()
+            .string_value
+        )
+        self.drum_motor = VESC(
+            serial_port=self.get_parameter("drum_motor_port")
+            .get_parameter_value()
+            .string_value
+        )
 
         self.arm_angle_pub = self.create_publisher(
             Float32,
@@ -89,14 +89,12 @@ class MiningArm(Node):
                 .get_parameter_value()
                 .integer_value
             )
-            offset = self.create_rate(
-                self.get_parameter("angle_offset")
-                .get_parameter_value()
+            offset = self.get_parameter("angle_offset") \
+                .get_parameter_value()  \
                 .double_value
-            )
 
             while self.updating_arm_angle:
-                self.arm_angle = angle_sensor.get_angle() - offset
+                self.arm_angle = angle_sensor.get_angle() + offset
                 self.arm_angle_update_event.set()
                 self.arm_angle_update_event.clear()
                 self.arm_angle_pub.publish(Float32(data=self.arm_angle))
@@ -138,10 +136,10 @@ class MiningArm(Node):
         def send_arm_velocity(arm_vel):
             max_angle = self.get_parameter("max_arm_angle") \
                 .get_parameter_value()  \
-                .integer_value
+                .double_value
             min_angle = self.get_parameter("min_arm_angle") \
                 .get_parameter_value()  \
-                .integer_value
+                .double_value
 
             while True:
                 vel = arm_vel.value
@@ -153,7 +151,6 @@ class MiningArm(Node):
                     self.arm_motor.set_duty_cycle(0)
                     continue
 
-                self.get_logger().info(f"{vel}")
                 self.arm_motor.set_duty_cycle(vel)
 
         Thread(
@@ -164,7 +161,7 @@ class MiningArm(Node):
         ).start()
 
     def close(self):
-        self.updating_arm_angle = False
+        # self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
         self.drum_motor.stop_heartbeat()
 
@@ -224,7 +221,7 @@ class MiningArm(Node):
             return
 
         self.arm_velocity.value = msg.data
-        self.get_logger().info(f"{self.arm_velocity.value}")
+        # self.get_logger().info(f"{self.arm_velocity.value}")
         # self.is_arm_vel_set = True
         # self.arm_motor.set_duty_cycle(msg.data)
 

@@ -3,6 +3,7 @@ from multiprocessing import Process, Value, Pipe
 from asyncio import Event
 from typing import Union
 from random import randint
+from time import time
 
 import rclpy
 from rclpy.node import Node
@@ -24,6 +25,8 @@ class Server(Node):
     BUFFER_SIZE = 128
     # How long to wait to relisten after a connection failure
     RELISTEN_DELAY = 2
+
+    MOVEMENT_INTENT_DELAY = 0.1
 
     def __init__(self):
         super().__init__("telemetry_server")
@@ -59,6 +62,8 @@ class Server(Node):
             10
         )
 
+        self.last_movement_msg_time = 0
+
         def main_loop(*args):
             asyncio.run(self.main_loop(*args))
 
@@ -79,6 +84,11 @@ class Server(Node):
         self.main_loop_process.start()
 
     def on_movement_intent_msg(self, msg):
+        current_time = time()
+        if current_time - self.last_movement_msg_time <= \
+                self.MOVEMENT_INTENT_DELAY:
+            return
+        self.last_movement_msg_time = current_time
         self.send_data(
             message_to_bytes(
                 RemoteMovementIntent(

@@ -1,5 +1,6 @@
 import asyncio
-from multiprocessing import Process, Value, Pipe
+from multiprocessing import Value, Pipe
+from threading import Thread
 from typing import Union
 from asyncio import Event
 
@@ -39,61 +40,48 @@ class Client(Node):
 
         self.declare_parameter(
             'server_addr',
-            "127.0.0.1",
+            '192.168.137.1',
+            # "127.0.0.1",
             ParameterDescriptor(
                 description='The address to connect to'
             )
         )
 
         def main_loop(*args):
-            asyncio.run(Client.main_loop(*args))
+            asyncio.run(self.main_loop(*args))
 
-        self.main_loop_process = Process(
+        self.main_loop_process = Thread(
             target=main_loop,
             args=(
-                self.get_parameter("server_addr")
-                    .get_parameter_value()
-                    .string_value,
-                self.get_parameter("port")
-                    .get_parameter_value()
-                    .integer_value,
-                self.get_logger(),
                 main_loop_pipe,
-                self.can_write,
-                self.create_publisher(
-                    Empty,
-                    'hard_ping',
-                    10
-                ),
-                self.create_publisher(
-                    MovementIntent,
-                    'movement_intent',
-                    10
-                ),
-                self.RECONNECTION_DELAY,
-                self.BUFFER_SIZE
             )
         )
 
         self.main_loop_process.start()
 
-    @staticmethod
-    async def main_loop(
-        server_addr: str,
-        port: int,
-        logger,
-        write_pipe,
-        can_write: Value,
-        hard_ping_pub,
-        movement_intent_pub,
-        reconnection_delay: int,
-        buffer_size: int
-    ):
+    async def main_loop(self, write_pipe):
         """
         Constantly connects to the remote host on TCP and listen for messsages.
 
         Upon a connection failure, reconnection will always be attempted
         """
+        server_addr = self.get_parameter("server_addr") \
+            .get_parameter_value()  \
+            .string_value
+        port = self.get_parameter("port")   \
+            .get_parameter_value()  \
+            .integer_value
+        hard_ping_pub = self.create_publisher(
+            Empty,
+            'hard_ping',
+            10
+        )
+        movement_intent_pub = self.create_publisher(
+            MovementIntent,
+            'movement_intent',
+            10
+        )
+        logger = self.get_logger()
         logger.info(f"Client main_loop initiated to {server_addr}:{port}")
 
         while True:  # outer loop
@@ -102,10 +90,10 @@ class Client(Node):
                     reader, writer = await Client.connect(server_addr, port)
                     break
                 except ConnectionRefusedError:
-                    await asyncio.sleep(reconnection_delay)
+                    await asyncio.sleep(self.RECONNECTION_DELAY)
                 except Exception as e:
                     logger.error(f"Error in Client: {e}")
-                    await asyncio.sleep(reconnection_delay)
+                    await asyncio.sleep(self.RECONNECTION_DELAY)
 
             logger.info("TCP Connection established")
 
@@ -133,13 +121,13 @@ class Client(Node):
                         break
 
             writer_coro = asyncio.create_task(writer_task())
-            with can_write.get_lock():
-                can_write.value = True
+            with self.can_write.get_lock():
+                self.can_write.value = True
             data = bytearray()
 
             while True:  # Processing loop
                 try:
-                    tmp = await reader.read(buffer_size)
+                    tmp = await reader.read(self.BUFFER_SIZE)
                 except BrokenPipeError:
                     break
 
@@ -181,8 +169,8 @@ class Client(Node):
                     msg.steering = result.steering
                     movement_intent_pub.publish(msg)
 
-            with can_write.get_lock():
-                can_write.value = False
+            with self.can_write.get_lock():
+                self.can_write.value = False
             writer_coro.cancel()
             logger.warn("TCP Connection lost. Reconnecting...")
 
