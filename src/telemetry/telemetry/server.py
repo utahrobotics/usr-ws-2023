@@ -13,7 +13,6 @@ from rcl_interfaces.msg import ParameterDescriptor
 from telemetry.message_handler import parse_message, message_to_bytes
 from telemetry.message_handler import SoftPing, HardPing
 from telemetry.message_handler import IncompleteMessageException
-from telemetry.message_handler import SetDrumVelocity, SetArmVelocity
 from telemetry.message_handler import RemoteControl
 
 from std_msgs.msg import Empty, Float32
