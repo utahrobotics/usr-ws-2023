@@ -67,11 +67,11 @@ class MiningArm(Node):
             .get_parameter_value()
             .string_value
         )
-        # self.drum_motor = VESC(
-        #     serial_port=self.get_parameter("drum_motor_port")
-        #     .get_parameter_value()
-        #     .string_value
-        # )
+        self.drum_motor = VESC(
+            serial_port=self.get_parameter("drum_motor_port")
+            .get_parameter_value()
+            .string_value
+        )
 
         self.arm_angle = 0
         self.arm_angle_update_event = Event()

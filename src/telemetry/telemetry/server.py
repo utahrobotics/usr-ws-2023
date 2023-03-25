@@ -3,7 +3,8 @@ from multiprocessing import Process, Value, Pipe
 from asyncio import Event
 from typing import Union
 from random import randint
-from time import time
+from time import sleep
+from threading import Thread
 
 import rclpy
 from rclpy.node import Node
@@ -13,7 +14,7 @@ from telemetry.message_handler import parse_message, message_to_bytes
 from telemetry.message_handler import SoftPing, HardPing
 from telemetry.message_handler import IncompleteMessageException
 from telemetry.message_handler import SetDrumVelocity, SetArmVelocity
-from telemetry.message_handler import RemoteMovementIntent
+from telemetry.message_handler import RemoteControl
 
 from std_msgs.msg import Empty, Float32
 from global_msgs.msg import MovementIntent
@@ -27,7 +28,7 @@ class Server(Node):
     # How long to wait to relisten after a connection failure
     RELISTEN_DELAY = 2
 
-    RATE_LIMIT_DELAY = 0.1
+    RATE_LIMIT_DELAY = 0.25
 
     def __init__(self):
         super().__init__("telemetry_server")
@@ -77,13 +78,6 @@ class Server(Node):
             10
         )
 
-        self.last_movement_msg_time = 0
-        self.last_movement = b''
-        self.last_arm_vel_time = 0
-        self.last_arm_vel = b''
-        self.last_drum_vel_time = 0
-        self.last_drum_vel = b''
-
         def main_loop(*args):
             asyncio.run(self.main_loop(*args))
 
@@ -103,61 +97,34 @@ class Server(Node):
 
         self.main_loop_process.start()
 
-    def on_movement_intent_msg(self, msg):
-        current_time = time()
-        if current_time - self.last_movement_msg_time <= \
-                self.RATE_LIMIT_DELAY:
-            return
+        self.current_drive = 0.0
+        self.current_steer = 0.0
+        self.current_arm_vel = 0.0
+        self.current_drum_vel = 0.0
 
-        msg = message_to_bytes(
-            RemoteMovementIntent(
-                msg.drive,
-                msg.steering
+        Thread(target=self.send_loop).start()
+
+    def send_loop(self):
+        while True:
+            sleep(self.RATE_LIMIT_DELAY)
+            self.send_data(
+                RemoteControl(
+                    self.current_drive,
+                    self.current_steer,
+                    self.current_arm_vel,
+                    self.current_drum_vel
+                )
             )
-        )
 
-        if msg == self.last_movement:
-            return
-
-        self.last_movement = msg
-        self.last_movement_msg_time = current_time
-        self.send_data(msg)
+    def on_movement_intent_msg(self, msg):
+        self.current_drive = msg.drive
+        self.current_steer = msg.steering
 
     def on_arm_vel_msg(self, msg):
-        current_time = time()
-        if current_time - self.last_arm_vel_time <= \
-                self.RATE_LIMIT_DELAY:
-            return
-
-        msg = message_to_bytes(
-            SetArmVelocity(
-                msg.data,
-            )
-        )
-
-        if msg == self.last_arm_vel:
-            return
-        self.last_arm_vel = msg
-        self.last_arm_vel_time = current_time
-        self.send_data(msg)
+        self.current_arm_vel = msg.data
 
     def on_drum_vel_msg(self, msg):
-        current_time = time()
-        if current_time - self.last_drum_vel_time <= \
-                self.RATE_LIMIT_DELAY:
-            return
-
-        msg = message_to_bytes(
-            SetDrumVelocity(
-                msg.data,
-            )
-        )
-
-        if msg == self.last_drum_vel:
-            return
-        self.last_drum_vel = msg
-        self.last_drum_vel_time = current_time
-        self.send_data(msg)
+        self.current_drum_vel = msg.data
 
     def on_soft_ping_msg(self, _msg):
         self.send_data(
@@ -250,8 +217,8 @@ class Server(Node):
                 elif isinstance(result, SoftPing):
                     logger.info("Received Soft Ping")
 
-                elif isinstance(result, RemoteMovementIntent):
-                    logger.error("Received MovementIntent!?")
+                elif isinstance(result, RemoteControl):
+                    logger.error("Received RemoteControl!?")
 
             with can_write.get_lock():
                 can_write.value = False

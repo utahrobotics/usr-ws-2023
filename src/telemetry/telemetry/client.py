@@ -12,7 +12,7 @@ from telemetry.message_handler import parse_message, SoftPing, HardPing
 from telemetry.message_handler import message_to_bytes
 from telemetry.message_handler import IncompleteMessageException
 from telemetry.message_handler import SetDrumVelocity, SetArmVelocity
-from telemetry.message_handler import RemoteMovementIntent
+from telemetry.message_handler import RemoteControl
 
 from std_msgs.msg import Empty, Float32
 from global_msgs.msg import MovementIntent
@@ -174,17 +174,13 @@ class Client(Node):
                     except BrokenPipeError or ConnectionResetError:
                         break
 
-                elif isinstance(result, RemoteMovementIntent):
+                elif isinstance(result, RemoteControl):
                     msg = MovementIntent()
                     msg.drive = result.drive
                     msg.steering = result.steering
                     movement_intent_pub.publish(msg)
-
-                elif isinstance(result, SetArmVelocity):
-                    arm_vel_pub.publish(Float32(data=result.velocity))
-
-                elif isinstance(result, SetDrumVelocity):
-                    drum_vel_pub.publish(Float32(data=result.velocity))
+                    arm_vel_pub.publish(Float32(data=result.arm_vel))
+                    drum_vel_pub.publish(Float32(data=result.drum_vel))
 
             with self.can_write.get_lock():
                 self.can_write.value = False

@@ -1,5 +1,5 @@
 from telemetry.message_handler import parse_message, SoftPing, HardPing
-from telemetry.message_handler import RemoteMovementIntent
+from telemetry.message_handler import RemoteControl
 from telemetry.message_handler import IncompleteMessageException
 import pytest
 
@@ -30,35 +30,35 @@ def test_hard_ping_no_body():
 
 def test_movement_intent01():
     msg = parse_message(bytearray([2, 0, 0]))
-    assert isinstance(msg, RemoteMovementIntent)
+    assert isinstance(msg, RemoteControl)
     assert msg.drive == -1
     assert msg.steering == -1
 
 
 def test_movement_intent02():
     msg = parse_message(bytearray([2, 53, 173]))
-    assert isinstance(msg, RemoteMovementIntent)
+    assert isinstance(msg, RemoteControl)
     assert msg.drive == (53 - 127) / 127
     assert msg.steering == (173 - 127) / 127
 
 
 def test_movement_intent03():
     msg = parse_message(bytearray([2, 255, 255]))
-    assert isinstance(msg, RemoteMovementIntent)
+    assert isinstance(msg, RemoteControl)
     assert msg.drive == 1
     assert msg.steering == 1
 
 
 def test_movement_intent04():
     msg = parse_message(bytearray([2, 254, 254]))
-    assert isinstance(msg, RemoteMovementIntent)
+    assert isinstance(msg, RemoteControl)
     assert msg.drive == 1
     assert msg.steering == 1
 
 
 def test_movement_intent05():
     msg = parse_message(bytearray([2, 127, 127]))
-    assert isinstance(msg, RemoteMovementIntent)
+    assert isinstance(msg, RemoteControl)
     assert msg.drive == 0
     assert msg.steering == 0
 

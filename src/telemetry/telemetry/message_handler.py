@@ -31,7 +31,7 @@ class AbstractMessage(ABC):
         pass
 
 
-class RemoteMovementIntent(AbstractMessage):
+class RemoteControl(AbstractMessage):
     """
     A remote request to perform some movement.
 
@@ -43,20 +43,30 @@ class RemoteMovementIntent(AbstractMessage):
     HEADER_BYTE = 2
     REDUNDANCY = 3
 
-    def __init__(self, drive: float, steering: float):
+    def __init__(
+        self,
+        drive: float,
+        steering: float,
+        arm_vel: float,
+        drum_vel: float
+    ):
         self.drive = drive
         self.steering = steering
+        self.arm_vel = arm_vel
+        self.drum_vel = drum_vel
 
     @classmethod
-    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
-        if len(data) < 2 * cls.REDUNDANCY:
+    def parse(cls, data: bytearray) -> "RemoteControl":
+        if len(data) < 4 * cls.REDUNDANCY:
             raise IncompleteMessageException()
 
         drive = 0.0
         steering = 0.0
+        arm_vel = 0.0
+        drum_vel = 0.0
 
         for i in range(cls.REDUNDANCY):
-            i *= cls.REDUNDANCY
+            i *= 4
             if data[i] == 255:
                 drive += 1.0
             else:
@@ -67,80 +77,30 @@ class RemoteMovementIntent(AbstractMessage):
             else:
                 steering += (data[i + 1] - 127) / 127
 
-        del data[0:2 * cls.REDUNDANCY]
+            if data[i + 2] == 255:
+                arm_vel += 1.0
+            else:
+                arm_vel += (data[i + 2] - 127) / 127
+
+            if data[i + 3] == 255:
+                drum_vel += 1.0
+            else:
+                drum_vel += (data[i + 3] - 127) / 127
+
+        del data[0:4 * cls.REDUNDANCY]
         drive /= cls.REDUNDANCY
         steering /= cls.REDUNDANCY
-        return RemoteMovementIntent(drive, steering)
+        arm_vel /= cls.REDUNDANCY
+        drum_vel /= cls.REDUNDANCY
+        return RemoteControl(drive, steering, arm_vel, drum_vel)
 
     def to_bytes(self) -> bytes:
         return bytes([
             255 if self.drive == 1 else int((self.drive + 1) * 127),
-            255 if self.steering == 1 else int((self.steering + 1) * 127)
+            255 if self.steering == 1 else int((self.steering + 1) * 127),
+            255 if self.arm_vel == 1 else int((self.arm_vel + 1) * 127),
+            255 if self.drum_vel == 1 else int((self.drum_vel + 1) * 127)
         ] * self.REDUNDANCY)
-
-
-class SetArmVelocity(AbstractMessage):
-    """
-    A remote request to set the velocity of the arm.
-
-    The first byte represents the velocity (byte value of 0 represents -1.0,
-    and value of 255 represents 1.0 drive)
-    """
-
-    HEADER_BYTE = 3
-
-    def __init__(self, velocity: float):
-        self.velocity = velocity
-
-    @classmethod
-    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
-        if len(data) < 1:
-            raise IncompleteMessageException()
-
-        if data[0] == 255:
-            vel = 1.0
-        else:
-            vel = (data[0] - 127) / 127
-
-        del data[0]
-        return SetArmVelocity(vel)
-
-    def to_bytes(self) -> bytes:
-        return bytes([
-            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
-        ])
-
-
-class SetDrumVelocity(AbstractMessage):
-    """
-    A remote request to set the velocity of the drum.
-
-    The first byte represents the velocity (byte value of 0 represents -1.0,
-    and value of 255 represents 1.0 drive)
-    """
-
-    HEADER_BYTE = 4
-
-    def __init__(self, velocity: float):
-        self.velocity = velocity
-
-    @classmethod
-    def parse(cls, data: bytearray) -> "RemoteMovementIntent":
-        if len(data) < 1:
-            raise IncompleteMessageException()
-
-        if data[0] == 255:
-            vel = 1.0
-        else:
-            vel = (data[0] - 127) / 127
-
-        del data[0]
-        return SetDrumVelocity(vel)
-
-    def to_bytes(self) -> bytes:
-        return bytes([
-            255 if self.velocity == 1 else int((self.velocity + 1) * 127)
-        ])
 
 
 class NoBodyMessage(AbstractMessage, ABC):
@@ -214,9 +174,7 @@ class HardPing(SoftPing):
 MESSAGE_TYPES = (
     SoftPing,
     HardPing,
-    RemoteMovementIntent,
-    SetArmVelocity,
-    SetDrumVelocity
+    RemoteControl,
 )
 
 

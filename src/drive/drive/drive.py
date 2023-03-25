@@ -18,7 +18,7 @@ class Drive(Node):
 
         self.declare_parameter(
             "controller_port",
-            "/dev/ttyACM0",
+            "/dev/ttyACM2",
             ParameterDescriptor(
                 description="The port of the motor controller"
             )
@@ -31,20 +31,20 @@ class Drive(Node):
             115200
         )
 
-        self.controller.write("printReadies()\r".encode())
-        self.controller.flush()
-        self.controller.readline()
-        ready = True
-        for _ in range(6):
-            line = self.controller.readline().decode()
-            split = line.split(" ")
-            if split[-1] != "1":
-                self.get_logger().error(" ".join(split[0::-1]) + " not ready!")
-                ready = False
-        self.controller.read(4)
-        
-        if not ready:
-            return
+        # self.controller.write("printReadies()\r".encode())
+        # self.controller.flush()
+        # self.controller.readline()
+        # ready = True
+        # for _ in range(6):
+        #     line = self.controller.readline().decode()
+        #     split = line.split(" ")
+        #     if split[-1] != "1":
+        #         self.get_logger().error(" ".join(split[0::-1]) + " not ready!")
+        #         ready = False
+        # self.controller.read(4)
+
+        # if not ready:
+        #     return
 
         self.movement_listener = self.create_subscription(
             MovementIntent,
@@ -79,6 +79,7 @@ class Drive(Node):
                 f"s(1,{int(left_drive > 0)},{int(right_drive > 0)},"
                 f"{left_drive},{right_drive})\r"
             ).encode())
+            self.controller.flush()
 
 
 def main():
