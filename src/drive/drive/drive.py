@@ -67,7 +67,7 @@ class Drive(Node):
         else:
             # set(enable, left_dir, right_dir, left_speed, right_speed)
             self.controller.write(
-                f"set(1,{int(left_drive > 0)},{int(right_drive > 0)},"
+                f"s(1,{int(left_drive > 0)},{int(right_drive > 0)},"
                 f"{left_drive},{right_drive})"
             )
 
