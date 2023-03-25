@@ -108,7 +108,7 @@ class Server(Node):
         if current_time - self.last_movement_msg_time <= \
                 self.RATE_LIMIT_DELAY:
             return
-        
+
         msg = message_to_bytes(
             RemoteMovementIntent(
                 msg.drive,
