@@ -221,9 +221,6 @@ class MiningArm(Node):
             return
 
         self.arm_velocity.value = msg.data
-        # self.get_logger().info(f"{self.arm_velocity.value}")
-        # self.is_arm_vel_set = True
-        # self.arm_motor.set_duty_cycle(msg.data)
 
     def set_drum_velocity(self, msg):
         if not -1 <= msg.data <= 1:
