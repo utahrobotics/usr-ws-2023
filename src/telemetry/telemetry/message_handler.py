@@ -41,6 +41,7 @@ class RemoteMovementIntent(AbstractMessage):
     """
 
     HEADER_BYTE = 2
+    REDUNDANCY = 3
 
     def __init__(self, drive: float, steering: float):
         self.drive = drive
@@ -48,27 +49,34 @@ class RemoteMovementIntent(AbstractMessage):
 
     @classmethod
     def parse(cls, data: bytearray) -> "RemoteMovementIntent":
-        if len(data) < 2:
+        if len(data) < 2 * cls.REDUNDANCY:
             raise IncompleteMessageException()
 
-        if data[0] == 255:
-            drive = 1.0
-        else:
-            drive = (data[0] - 127) / 127
+        drive = 0.0
+        steering = 0.0
 
-        if data[1] == 255:
-            steering = 1.0
-        else:
-            steering = (data[1] - 127) / 127
+        for i in range(cls.REDUNDANCY):
+            i *= cls.REDUNDANCY
+            if data[i] == 255:
+                drive += 1.0
+            else:
+                drive += (data[i] - 127) / 127
 
-        del data[0:2]
+            if data[i + 1] == 255:
+                steering += 1.0
+            else:
+                steering += (data[i + 1] - 127) / 127
+
+        del data[0:2 * cls.REDUNDANCY]
+        drive /= cls.REDUNDANCY
+        steering /= cls.REDUNDANCY
         return RemoteMovementIntent(drive, steering)
 
     def to_bytes(self) -> bytes:
         return bytes([
             255 if self.drive == 1 else int((self.drive + 1) * 127),
             255 if self.steering == 1 else int((self.steering + 1) * 127)
-        ])
+        ] * self.REDUNDANCY)
 
 
 class SetArmVelocity(AbstractMessage):
