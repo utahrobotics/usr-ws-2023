@@ -53,8 +53,10 @@ class GamepadNode(Node):
                 continue
             # for x axis, 0 is left, 255 is right, 128 is middle
             # for y axis, 0 is up, 255 is down, 128 is middle
-            # left stick x, left stick y, right stick y
-            joysticks = [report[1], report[2], report[4]]
+            # left stick x, right stick y
+            joysticks = [report[1], report[4]]
+            # left trigger, right trigger (both 0 when unpressed, 255 when pressed)
+            triggers = [report[8], report[9]]
             # apply deadzone
             for i in range(len(joysticks)):
                 if abs(joysticks[i] - 128) <= 128 * self.deadzone:
@@ -68,7 +70,7 @@ class GamepadNode(Node):
             movement_intent.drive = - joysticks[1] / 128 + 1.0
             self.move_publisher.publish(movement_intent)
             # publish arm velocity
-            self.arm_publisher.publish(Float32(data=-joysticks[2] / 128 + 1.0))
+            self.arm_publisher.publish(Float32(data= (triggers[1] - triggers[0])/255))
             # publish drum velocity
             if r_bumper == l_bumper:
                 self.drum_publisher.publish(Float32(data=0.0))
