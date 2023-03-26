@@ -12,5 +12,8 @@ services:
       - type: bind
         source: ../
         target: /usr-ws-2023
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
     environment:
       DISPLAY: "unix:0"
