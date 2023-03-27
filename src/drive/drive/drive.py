@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 
 from serial import Serial
+from threading import Thread
 
 from drive.drive_calculator import drive_steering
 
@@ -31,20 +32,19 @@ class Drive(Node):
             115200
         )
 
-        # self.controller.write("printReadies()\r".encode())
-        # self.controller.flush()
-        # self.controller.readline()
-        # ready = True
-        # for _ in range(6):
-        #     line = self.controller.readline().decode()
-        #     split = line.split(" ")
-        #     if split[-1] != "1":
-        #         self.get_logger().error(" ".join(split[0::-1]) + " not ready!")
-        #         ready = False
-        # self.controller.read(4)
+        self.controller.write("printReadies()\r".encode())
+        self.controller.readline()
+        unready = []
+        for _ in range(6):
+            line = self.controller.readline().decode()
+            # self.get_logger().info(line)
+            if "0" in line:
+                unready.append(line)
 
-        # if not ready:
-        #     return
+        if len(unready) > 3:
+            for line in unready:
+                self.get_logger().error(line)
+            return
 
         self.movement_listener = self.create_subscription(
             MovementIntent,
@@ -52,6 +52,12 @@ class Drive(Node):
             self.movement_callback,
             50
         )
+
+        # def logger():
+        #     while True:
+        #         self.get_logger().info(self.controller.readline().decode())
+
+        # Thread(target=logger).start()
 
     def movement_callback(self, msg):
         left_drive, right_drive = drive_steering(msg.drive, msg.steering)

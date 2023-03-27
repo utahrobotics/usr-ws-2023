@@ -163,7 +163,7 @@ class MiningArm(Node):
     def close(self):
         # self.updating_arm_angle = False
         self.arm_motor.stop_heartbeat()
-        # self.drum_motor.stop_heartbeat()
+        self.drum_motor.stop_heartbeat()
 
     # def set_arm_angle_callback(self, goal_handle: ServerGoalHandle):
     #     if self.setting_arm_angle:

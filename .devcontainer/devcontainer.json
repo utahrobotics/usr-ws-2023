@@ -25,6 +25,8 @@
 			]
 		}
 	},
+
+	// Correctly starts up the container with x11 binded
 	"initializeCommand": "wsl --cd C:\\GitRepos\\usr-ws-2023\\deployment_utils docker compose up -d"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

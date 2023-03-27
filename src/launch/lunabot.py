@@ -11,7 +11,7 @@ def generate_launch_description():
         Node(
             package='telemetry',
             executable='client',
-            name='telementry_client'
+            name='telemetry_client'
         ),
         Node(
             package='mining_arm',
