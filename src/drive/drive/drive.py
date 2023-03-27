@@ -4,6 +4,7 @@ from rcl_interfaces.msg import ParameterDescriptor
 
 from serial import Serial
 from threading import Thread
+from pyvesc import VESC
 
 from drive.drive_calculator import drive_steering
 
@@ -17,9 +18,13 @@ class Drive(Node):
     def __init__(self):
         super().__init__("drive")
 
+        self.spare_controller = VESC(
+            serial_port="/dev/spare_motor"
+        )
+
         self.declare_parameter(
             "controller_port",
-            "/dev/ttyACM2",
+            "/dev/drive_control",
             ParameterDescriptor(
                 description="The port of the motor controller"
             )
@@ -79,8 +84,10 @@ class Drive(Node):
 
         if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
             self.controller.write(b'setEnable(0)\r')
+            self.spare_controller.set_duty_cycle(0.0)
         else:
             # set(enable, left_dir, right_dir, left_speed, right_speed)
+            self.spare_controller.set_duty_cycle(right_drive)
             self.controller.write((
                 f"s(1,{int(left_drive > 0)},{int(right_drive > 0)},"
                 f"{left_drive},{right_drive})\r"

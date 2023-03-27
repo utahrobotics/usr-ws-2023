@@ -19,7 +19,7 @@ class MiningArm(Node):
 
         self.declare_parameter(
             "arm_motor_port",
-            "/dev/ttyACM1",
+            "/dev/fsesc_arm",
             ParameterDescriptor(
                 description="The serial port that the arm motor"
                 " is connected to"
@@ -27,10 +27,17 @@ class MiningArm(Node):
         )
         self.declare_parameter(
             "drum_motor_port",
-            "/dev/ttyACM0",
+            "/dev/fsesc_drum",
             ParameterDescriptor(
                 description="The serial port that the drum motor"
                 " is connected to"
+            )
+        )
+        self.declare_parameter(
+            "arm_speed_scale",
+            0.6,
+            ParameterDescriptor(
+                description="A scale factor for the speed of the arm"
             )
         )
         self.declare_parameter(
@@ -140,6 +147,9 @@ class MiningArm(Node):
             min_angle = self.get_parameter("min_arm_angle") \
                 .get_parameter_value()  \
                 .double_value
+            scale = self.get_parameter("arm_speed_scale") \
+                .get_parameter_value()  \
+                .double_value
 
             while True:
                 vel = arm_vel.value
@@ -151,7 +161,7 @@ class MiningArm(Node):
                     self.arm_motor.set_duty_cycle(0)
                     continue
 
-                self.arm_motor.set_duty_cycle(vel)
+                self.arm_motor.set_duty_cycle(vel * scale)
 
         Thread(
             target=send_arm_velocity,
