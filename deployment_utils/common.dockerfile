@@ -18,9 +18,6 @@ RUN apt-get install python-dev libusb-1.0-0-dev libudev-dev -y --no-install-reco
 RUN pip install --upgrade setuptools && \
     pip install rosdep pyserial hidapi
 
-# Install pyvesc from github as it is 5 years newer than from pypi
-RUN pip install git+https://github.com/LiamBindle/PyVESC.git
-
 # Install colcon and build essentials
 RUN apt-get install python3-colcon-common-extensions build-essential -y --no-install-recommends
 # Update rosdep
@@ -31,8 +28,12 @@ RUN rosdep init && rosdep update
 # # Install nav2 components as separate layers (to make it easier to upload and cache)
 # RUN apt-get install ros-foxy-navigation2 -y --no-install-recommends
 # RUN apt-get install ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
+
 # Install usbutils, nano, and git
 RUN apt-get install usbutils nano git -y --no-install-recommends
+
+# Install pyvesc from github as it is 4 years newer than from pypi
+RUN pip install git+https://github.com/LiamBindle/PyVESC.git
 
 COPY base_bashrc_append.sh /bashrc_append
 COPY findusbdev.sh /root
