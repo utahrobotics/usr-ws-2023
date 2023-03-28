@@ -16,17 +16,21 @@ RUN apt-get install ros-foxy-ros-base python3-argcomplete -y --no-install-recomm
 RUN apt-get install python-dev libusb-1.0-0-dev libudev-dev -y --no-install-recommends
 # Upgrade setuptools, then install GPIO and VESC stuff, and rosdep
 RUN pip install --upgrade setuptools && \
-    pip install Jetson.GPIO pyvesc rosdep pyserial hidapi
+    pip install rosdep pyserial hidapi
+
+# Install pyvesc from github as it is 5 years newer than from pypi
+RUN pip install git+https://github.com/LiamBindle/PyVESC.git
+
 # Install colcon and build essentials
 RUN apt-get install python3-colcon-common-extensions build-essential -y --no-install-recommends
 # Update rosdep
 RUN rosdep init && rosdep update
 
-# install realsense 2 ROS
-RUN apt-get install ros-foxy-realsense2-camera -y --no-install-recommends
-# Install nav2 components as separate layers (to make it easier to upload and cache)
-RUN apt-get install ros-foxy-navigation2 -y --no-install-recommends
-RUN apt-get install ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
+# # install realsense 2 ROS
+# RUN apt-get install ros-foxy-realsense2-camera -y --no-install-recommends
+# # Install nav2 components as separate layers (to make it easier to upload and cache)
+# RUN apt-get install ros-foxy-navigation2 -y --no-install-recommends
+# RUN apt-get install ros-foxy-nav2-bringup '~ros-foxy-turtlebot3-.*' -y --no-install-recommends
 # Install usbutils, nano, and git
 RUN apt-get install usbutils nano git -y --no-install-recommends
 
