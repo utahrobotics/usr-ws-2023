@@ -27,7 +27,7 @@ class Server(Node):
     # How long to wait to relisten after a connection failure
     RELISTEN_DELAY = 2
 
-    RATE_LIMIT_DELAY = 0.25
+    RATE_LIMIT_DELAY = 0.4
 
     def __init__(self):
         super().__init__("telemetry_server")

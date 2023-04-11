@@ -3,7 +3,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 
 from serial import Serial
-from threading import Thread
+# from threading import Thread
 from pyvesc import VESC
 
 from drive.drive_calculator import drive_steering
