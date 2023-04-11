@@ -84,15 +84,16 @@ class Drive(Node):
 
         if abs(right_drive) < 0.01 and abs(left_drive) < 0.01:
             self.controller.write(b'setEnable(0)\r')
+            self.controller.readline()
             self.spare_controller.set_duty_cycle(0.0)
         else:
-            # set(enable, left_dir, right_dir, left_speed, right_speed)
             self.spare_controller.set_duty_cycle(right_drive)
+            # s(enable, left_dir, right_dir, left_speed, right_speed)
             self.controller.write((
                 f"s(1,{int(left_drive > 0)},{int(right_drive > 0)},"
                 f"{left_drive},{right_drive})\r"
             ).encode())
-            self.controller.flush()
+            self.controller.readline()
 
 
 def main():
