@@ -7,6 +7,7 @@ def main():
         115200
     )
 
+    print("Reading")
     while True:
         print(controller.readline().decode())
 
